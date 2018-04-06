@@ -24,14 +24,14 @@
       var map;
       function initMap() 
 	  {
-		var my_lat_lon = {lat: 33.62706, lng: -111.983348};
+		var my_lat_lon = {lat: 34.511647362755895, lng: -109.37556320855016};
 		
         map = new google.maps.Map(document.getElementById('map'), {
           center: my_lat_lon,
           zoom: 18
         });
 		
-		var marker = new google.maps.Marker({
+		/*var marker = new google.maps.Marker({
           position: my_lat_lon,
           map: map,
           title: 'Mom and Dad\'s House'
@@ -41,7 +41,10 @@
           content:  'Mom and Dad\'s House'
         });
 		
-		infowindow.open(map, marker);
+		infowindow.open(map, marker);*/
+		
+		map.data.loadGeoJson(
+            './parcel.json');
       }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initMap"
