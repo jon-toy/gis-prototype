@@ -1,0 +1,22 @@
+{
+  "name": "gis-proto",
+  "version": "1.0.0",
+  "description": "Protoype for GIS project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jon-toy/gis-prototype.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jon-toy/gis-prototype/issues"
+  },
+  "homepage": "https://github.com/jon-toy/gis-prototype#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
