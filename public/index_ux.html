@@ -67,7 +67,7 @@
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Tables">
           <a class="nav-link" href="#">
             <i class="fa fa-fw fa-table"></i>
-            <span class="nav-link-text">Parcel Number<br><strong><span id="info_dash">#####</span></strong></span>
+            <span class="nav-link-text">Owner<br><strong><span id="info_dash">#####</span></strong></span>
           </a>
         </li>
         <!--<li class="nav-item" data-toggle="tooltip" data-placement="right" title="Components">
@@ -382,7 +382,7 @@
 			
 		map.data.addListener('mouseover', function(event)
 		{
-			document.getElementById('info_dash').innerHTML = event.feature.getProperty('PARCEL_NUM');
+			document.getElementById('info_dash').innerHTML = event.feature.getProperty('OWNER');
 		});
 		
 		map.data.addListener('click', function(event) 
