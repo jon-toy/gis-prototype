@@ -27,6 +27,10 @@
 		display: grid;
       }
 	  
+	  .info-panel {
+		display: grid;
+	  }
+	  
 	  .info-title {
 		grid-column-start: 1;
 		padding: .5em;
@@ -39,13 +43,44 @@
     </style>
   </head>
   <body>
+	<div id="controls">
+		<div>
+			Latitude: 
+			<input type="number" id="lat">
+			Longitude: 
+			<input type="number" id="lon">
+			<button type="button" onclick="goToLatLon();">Go</button>
+		</div>	
+		
+		<div>
+			Search by Parcel Number
+			<input type="text">
+			<button type="button" onclick="goToParcel();">Search</button>
+		</div>
+	</div>
     <div id="map"></div>
 	<div id="info-box"></div>
     <script>
       var map;
-      function initMap() 
+	  
+	  function goToParcel()
 	  {
-		var my_lat_lon = {lat: 33.837655219463926, lng: -109.11409610177091};
+		// TODO
+	  }
+	  
+	  function goToLatLon()
+	  {
+		var lat_val = parseFloat(document.getElementById("lat").value);
+		var lon_val = parseFloat(document.getElementById("lon").value);
+		
+		var my_lat_lon = {lat: lat_val, lng: lon_val};
+		
+        initMap(my_lat_lon);
+	  }
+	  
+      function initMap(my_lat_lon) 
+	  {
+		if ( my_lat_lon == null ) my_lat_lon = {lat: 33.837655219463926, lng: -109.11409610177091};
 		
         map = new google.maps.Map(document.getElementById('map'), {
           center: my_lat_lon,
@@ -53,7 +88,7 @@
         });
 		
 		map.data.loadGeoJson(
-            './parcel3.json');
+            './parcel4poly.json');
 			
 		map.data.addListener('mouseover', function(event) 
 		{			
@@ -67,7 +102,19 @@
 			info_box.innerHTML = "";
 			
 			renderProperty(info_box, "Parcel Number", parcel);
+			renderProperty(info_box, "Description", event.feature.getProperty('DESCRIPTIO'));
+			renderProperty(info_box, "FCV", event.feature.getProperty('FCV'));
+			renderProperty(info_box, "Legal", event.feature.getProperty('LEGAL'));
+			renderProperty(info_box, "Line 1", event.feature.getProperty('LINE_1'));
+			renderProperty(info_box, "Line 2", event.feature.getProperty('LINE_2'));
+			renderProperty(info_box, "Number", event.feature.getProperty('NUMBER'));
+			renderProperty(info_box, "Owner", event.feature.getProperty('OWNER'));
+			renderProperty(info_box, "Owner City", event.feature.getProperty('OWNER_CITY'));
+			renderProperty(info_box, "Owner Zip", event.feature.getProperty('OWNER_ZIP'));
+			renderProperty(info_box, "Situs", event.feature.getProperty('SITUS'));
+			renderProperty(info_box, "Size", event.feature.getProperty('SIZE'));
 			renderProperty(info_box, "State", state);
+			renderProperty(info_box, "State 0", event.feature.getProperty('STATE0'));
 			renderProperty(info_box, "Township", township);
 			renderProperty(info_box, "Range", range);
 			renderProperty(info_box, "Section No.", sec_no);
@@ -107,6 +154,7 @@
 	  
 	  function renderProperty(container, title, content)
 	  {
+		if ( content == null ) return;
 		var title_container = document.createElement('div');
 		title_container.className = 'info-title';
 		title_container.innerHTML = title;
