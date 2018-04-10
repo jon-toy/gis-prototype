@@ -16,36 +16,108 @@
         margin: 0;
         padding: 0;
       }
+	  
+	  #info-box {
+        background-color: white;
+        border: 1px solid black;
+        bottom: 30px;
+        padding: 10px;
+        position: absolute;
+        left: 30px;		
+		display: grid;
+      }
+	  
+	  .info-title {
+		grid-column-start: 1;
+		padding: .5em;
+	  }
+	  
+	  .info-content {
+		grid-column-start: 3;
+		padding: .5em;
+	  }
     </style>
   </head>
   <body>
     <div id="map"></div>
+	<div id="info-box"></div>
     <script>
       var map;
       function initMap() 
 	  {
-		var my_lat_lon = {lat: 34.511647362755895, lng: -109.37556320855016};
+		var my_lat_lon = {lat: 33.837655219463926, lng: -109.11409610177091};
 		
         map = new google.maps.Map(document.getElementById('map'), {
           center: my_lat_lon,
           zoom: 18
         });
 		
-		/*var marker = new google.maps.Marker({
-          position: my_lat_lon,
-          map: map,
-          title: 'Mom and Dad\'s House'
-        });
-		
-		 var infowindow = new google.maps.InfoWindow({
-          content:  'Mom and Dad\'s House'
-        });
-		
-		infowindow.open(map, marker);*/
-		
 		map.data.loadGeoJson(
-            './parcel.json');
+            './parcel3.json');
+			
+		map.data.addListener('mouseover', function(event) 
+		{			
+			var parcel = event.feature.getProperty('PARCEL_NUM');
+			var state = event.feature.getProperty('STATE');
+			var township = event.feature.getProperty('TOWNSHIP');
+			var range = event.feature.getProperty('RANGE');
+			var sec_no = event.feature.getProperty('SEC_NO');
+			
+			var info_box = document.getElementById('info-box');
+			info_box.innerHTML = "";
+			
+			renderProperty(info_box, "Parcel Number", parcel);
+			renderProperty(info_box, "State", state);
+			renderProperty(info_box, "Township", township);
+			renderProperty(info_box, "Range", range);
+			renderProperty(info_box, "Section No.", sec_no);
+		});
+		
+		// Color each letter gray. Change the color when the isColorful property
+		// is set to true.
+		map.data.setStyle(function(feature) {
+		  var color = 'gray';
+		  if (feature.getProperty('isColorful')) {
+			color = feature.getProperty('color');
+		  }
+		  return /** @type {google.maps.Data.StyleOptions} */({
+			fillColor: color,
+			strokeColor: color,
+			strokeWeight: 2
+		  });
+		});
+
+		// When the user clicks, set 'isColorful', changing the color of the letters.
+		map.data.addListener('click', function(event) {
+		  event.feature.setProperty('isColorful', true);
+		});
+
+		// When the user hovers, tempt them to click by outlining the letters.
+		// Call revertStyle() to remove all overrides. This will use the style rules
+		// defined in the function passed to setStyle()
+		map.data.addListener('mouseover', function(event) {
+		  map.data.revertStyle();
+		  map.data.overrideStyle(event.feature, {strokeWeight: 8});
+		});
+
+		map.data.addListener('mouseout', function(event) {
+		  map.data.revertStyle();
+		});
       }
+	  
+	  function renderProperty(container, title, content)
+	  {
+		var title_container = document.createElement('div');
+		title_container.className = 'info-title';
+		title_container.innerHTML = title;
+		container.appendChild(title_container);
+		
+		var content_container = document.createElement('div');
+		content_container.className = 'info-content';
+		content_container.innerHTML = content;
+		container.appendChild(content_container);
+	  }
+	  
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initMap"
     async defer></script>
