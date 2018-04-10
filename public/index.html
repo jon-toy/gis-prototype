@@ -76,6 +76,11 @@
 		var my_lat_lon = {lat: lat_val, lng: lon_val};
 		
         initMap(my_lat_lon);
+		
+		var marker = new google.maps.Marker({
+			position: my_lat_lon,
+			map: map
+		  });
 	  }
 	  
       function initMap(my_lat_lon) 
