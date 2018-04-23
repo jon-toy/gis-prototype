@@ -36,22 +36,48 @@ function initPage()
 				
 				if ( selected_feature != null ) 
 				{
-					// Style and color the selected feature
-					map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-					
-					// Place a marker on there
-					var geom = selected_feature.getGeometry();
-					var poly = new google.maps.Polygon({
-						paths: geom.getAt(0).getArray(),
-					});
-					new google.maps.Marker({
-					  position: polygonCenter(poly),
-					  map: map
-					});
+					selectFeature(selected_feature);
 				}
 			});
 		}		
 	});
+}
+
+function selectFeature(selected_feature)
+{
+	// Style and color the selected feature
+	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
+					
+	// Place a marker on there
+	var geom = selected_feature.getGeometry();
+	var poly = new google.maps.Polygon({
+		paths: geom.getAt(0).getArray(),
+	});
+	new google.maps.Marker({
+	  position: polygonCenter(poly),
+	  map: map
+	});
+}
+
+function onSearchByParcelNo()
+{
+	event.preventDefault();
+	var parcel_num = document.getElementById("search-by-parcel-number").value;
+	if ( parcel_num == null || parcel_num.length <= 0 ) return;
+
+	for ( var i = 0; i < all_features.length; i++ ) 
+	{
+		var feature = all_features[i];
+		
+		if ( feature.getProperty('PARCEL_NUM') == parcel_num )
+		{
+			viewParcel(feature);
+			shown_parcel_on_startup = true;
+			selectFeature(feature);
+
+			return;
+		}
+	}
 }
 
 function goToLatLon()
@@ -91,13 +117,46 @@ function goToLatLon()
 	  });
 }
 
+// Submit Feedback
+$(document).ready(function() {
+	window.verifyRecaptchaCallback = function (response) {
+        $('input[data-recaptcha]').val(response).trigger('change')
+    }
+
+    window.expiredRecaptchaCallback = function () {
+        $('input[data-recaptcha]').val("").trigger('change')
+    }
+
+	$('#submit-feedback-form').submit(function() {
+	  $(this).ajaxSubmit({
+		error: function(xhr) {
+		  status('Error: ' + xhr.status);
+		},
+	   success: function(response) {
+		if ( response.success == true )
+		{
+			alert("Thank you for submitting feedback, " + response.name + "!");
+			$('#feedbackModal').modal('hide');
+		}
+		else
+		{
+			alert(response.message);
+		}
+	   }
+	  });
+	  //Very important line, it disable the page refresh.
+	  return false;
+	});
+  });
+
 function initMap(my_lat_lon) 
 {
 	if ( my_lat_lon == null ) my_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746);
 
 	map = new google.maps.Map(document.getElementById('map'), {
 	  center: my_lat_lon,
-	  zoom: 16
+	  zoom: 16,
+	  fullscreenControl: false
 	});
 		
 	map.data.addListener('mouseover', function(event)
@@ -115,6 +174,7 @@ function initMap(my_lat_lon)
 	map.data.addListener('mouseover', function(event) {
 	  map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
 	  displayCoordinates(event.latLng);
+	  displayParcel(event.feature);
 	});
 
 	map.data.addListener('mouseout', function(event) {
@@ -149,7 +209,12 @@ function initMap(my_lat_lon)
 		lat = lat.toFixed(4);
 		var lng = pnt.lng();
 		lng = lng.toFixed(4);
-		document.getElementById("latlon-display").innerHTML = "Latitude: " + lat + "  Longitude: " + lng;
+		document.getElementById("latlon-display").innerHTML = lat + ", " + lng;
+	}
+
+	function displayParcel(feature) 
+	{
+		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
 	}
 }
 

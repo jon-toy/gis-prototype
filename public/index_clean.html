@@ -50,11 +50,20 @@
 	  .content-wrapper, .content-wrapper > .container-fluid, .content-wrapper > .container-fluid > .row  {
 		height: 100%;
 	  }
+
+		@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+}
     </style>
 </head>
 
-<body>
-	<div class="container-fluid py-2 pr-0 h-100 d-flex flex-column bg-dark text-light">
+<body class="bg-light">
+	<div class="container-fluid py-2 h-100 d-flex flex-column bg-dark text-light">
 		<header class="d-flex align-items-center py-2">
 			<div id="header-content" class="">
 				Apache County GIS
@@ -62,9 +71,9 @@
 			<div id="search-content" class="ml-auto">
 				<form class="form-inline my-2 my-lg-0 mr-lg-2">
 					<div class="input-group">
-						<input class="form-control" type="text" placeholder="Search by Parcel No...">
+						<input class="form-control" type="text" id="search-by-parcel-number" placeholder="Search by Parcel No...">
 						<span class="input-group-append">
-							<button class="btn btn-primary" type="button">
+							<button class="btn btn-primary" type="button" onclick="javascript:onSearchByParcelNo();">
 								<i class="fa fa-search"></i>
 							</button>
 						</span>
@@ -73,12 +82,14 @@
 			</div>
 		</header>
 		<div class="d-flex h-100">
-			<div class="d-flex flex-column">
-				<!-- Sidebar -->
-				<a class="nav-link" href="#" data-toggle="modal"  data-target="#latLonModal">
-					<i class="fa fa-fw fa-wrench"></i>
-					<span class="nav-link-text">Go to Lat Lon</span>
-				</a>
+			<!-- Sidebar -->
+			<div id="sidebar" class="d-flex flex-column">
+				<p>
+					<a class="nav-link" href="#" data-toggle="modal"  data-target="#latLonModal">
+						<i class="fa fa-fw fa-wrench"></i>
+						<span class="nav-link-text">Go to Lat Lon</span>
+					</a>
+				</p>
 				<p>Test sidebar</p>
 				<p>Test sidebar</p>
 				<p>Test sidebar</p>
@@ -86,10 +97,10 @@
 				<p>Test sidebar</p>
 				<p class="mt-auto">Test sidebar</p>
 			</div>
-			<div class="d-flex flex-column container-fluid p-2 h-100 bg-light text-dark">
-				<!-- Body -->
-				 <div id="map"></div>
-				
+
+			<!-- Body -->
+			<div class="d-flex flex-column container-fluid p-2 h-100 bg-light text-dark mr-0">
+				<div id="map"></div>
 				<footer class="d-flex mt-auto align-items-center justify-content-center">
 					<p id="latlon-display">Latitude: Longitude: </p>
 				</footer>

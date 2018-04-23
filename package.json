@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/jon-toy/gis-prototype#readme",
   "dependencies": {
-    "express": "^4.16.3"
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "nodemailer": "^4.6.4",
+    "request": "^2.85.0",
+    "superagent": "^3.8.2"
   }
 }
