@@ -2,6 +2,8 @@ var map, GeoMarker;
 var geo_json_urls = [];
 var shown_parcel_on_startup = false;
 var all_features = []; // Unreliable on page load. Used for calls to action after page render
+var parcel_num_markers = [];
+const MARKER_ZOOM_THRESHOLD = 16;
 
 function initPage()
 {
@@ -43,20 +45,40 @@ function initPage()
 	});
 }
 
+function labelFeature(feature)
+{
+	if ( map.getZoom() < MARKER_ZOOM_THRESHOLD ) return; // Don't show labels when zoomed out so much
+	// Place a marker on there
+	var geom = feature.getGeometry();
+	var poly = new google.maps.Polygon({
+		paths: geom.getAt(0).getArray(),
+	});
+
+	var center = polygonCenter(poly);
+
+	var marker = new google.maps.Marker({
+	  position: center,
+	  map: map,
+	  label: feature.getProperty('PARCEL_NUM'),
+	  icon: "blank.png"
+	});
+
+	parcel_num_markers.push(marker);
+}
+
 function selectFeature(selected_feature)
 {
 	// Style and color the selected feature
 	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-					
-	// Place a marker on there
+
+	labelFeature(selected_feature);
+
 	var geom = selected_feature.getGeometry();
 	var poly = new google.maps.Polygon({
 		paths: geom.getAt(0).getArray(),
 	});
-	new google.maps.Marker({
-	  position: polygonCenter(poly),
-	  map: map
-	});
+	var center = polygonCenter(poly);
+	map.panTo(center);
 }
 
 function onSearchByParcelNo()
@@ -73,7 +95,6 @@ function onSearchByParcelNo()
 		{
 			viewParcel(feature);
 			shown_parcel_on_startup = true;
-			selectFeature(feature);
 
 			return;
 		}
@@ -155,7 +176,7 @@ function initMap(my_lat_lon)
 
 	map = new google.maps.Map(document.getElementById('map'), {
 	  center: my_lat_lon,
-	  zoom: 16,
+	  zoom: MARKER_ZOOM_THRESHOLD,
 	  fullscreenControl: false
 	});
 		
@@ -184,6 +205,19 @@ function initMap(my_lat_lon)
 	google.maps.event.addListener(map, 'mousemove', function (event) {
 	  displayCoordinates(event.latLng);               
 	});
+
+	map.addListener('zoom_changed', function() {
+		if ( map.getZoom() < MARKER_ZOOM_THRESHOLD )
+		{
+			// Wipe markers
+			for ( var i = 0; i < parcel_num_markers.length; i++ )
+			{
+				parcel_num_markers[i].setMap(null);
+			}
+
+			parcel_num_markers = [];
+		}
+	  });
 	
 	// GeoMarker stuff
 	locate();
@@ -263,6 +297,8 @@ function viewParcel(feature)
 	renderProperty(info_box, "Section No.", feature.getProperty('SEC_NO'));
 	
 	$("#parcelModal").modal("show");
+
+	selectFeature(feature);
 }
 
 function renderProperty(container, title, content)
