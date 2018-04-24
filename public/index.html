@@ -105,7 +105,13 @@
             </button>
           </div>
           <div class="modal-body">
-            This page serves as a viewer for Apache County GIS data. 
+              GIS information is provided on this Page as a public resource for general information purposes only. It is used to locate, identify and inventory parcels of land 
+              in Apache County for appraisal and taxation purposes only and is NOT to be construed or used as a “legal description.” Map and parcel information is believed to 
+              be accurate but accuracy is not guaranteed. No portion of the information should be considered to be, or used as, a legal document. Pursuant to A.R.S. 37-178(c), 
+              Apache County shares such data for purpose of convenience only and “is not liable for errors, inaccuracies or omissions and shall be held harmless from and against 
+              all damage, loss or liability arising from any use of geospatial data that is shared.” The information is provided subject to the express condition that the user knowingly 
+              waives any and all claims for damages against Apache County that may arise from the use of this data. Information provided on this Page should be reviewed and 
+              approved by an attorney or other qualified professional prior to its use for any purpose with potential legal consequences.
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
@@ -182,9 +188,9 @@
 	<!-- Bootstrap core JS -->
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
   
-  <script src="render.js"></script>
+  <script src="render.js" async defer></script>
   
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initPage"
   async defer></script>
-  <script src='https://www.google.com/recaptcha/api.js'></script>
+  <script src='https://www.google.com/recaptcha/api.js' async defer></script>
 </html>
