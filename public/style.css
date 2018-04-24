@@ -1,0 +1,62 @@
+@media (max-width: 768px) {
+    .navbar-content {
+        margin-bottom: 15rem; /* Modify this when nav needs more changes */
+    }
+    
+    .navbar-brand {
+        content:"Apache County GIS"
+    }
+
+    .navbar-brand img {
+        display:none !important;
+    }
+
+    .footer {
+        display:none !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .navbar-content {
+        display: flex;
+        width: 100%;
+    }
+
+    .search-form {
+        margin-left: auto;
+    }
+
+    .navbar-brand span {
+        display:none !important;
+    }
+}
+
+/* Always set the map height explicitly to define the size of the div
+* element that contains the map. */
+#map {
+    height: 100%;
+}
+
+#latlon-display {
+    margin-left:auto;
+}
+#parcel-num-display {
+    margin-left:auto;
+}
+
+.form-group.required .control-label:after {
+    content:"*";
+    color:red;
+}
+
+.nav-item {
+    font-size: 1.25rem;
+}
+
+html, body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}

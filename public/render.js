@@ -179,11 +179,6 @@ function initMap(my_lat_lon)
 	  zoom: MARKER_ZOOM_THRESHOLD,
 	  fullscreenControl: false
 	});
-		
-	map.data.addListener('mouseover', function(event)
-	{
-		//document.getElementById('info_dash').innerHTML = event.feature.getProperty('OWNER');
-	});
 
 	map.data.addListener('click', function(event) 
 	{			

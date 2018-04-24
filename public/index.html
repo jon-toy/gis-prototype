@@ -10,96 +10,10 @@
   <title>Apache County GIS Viewer</title>
   <!-- Bootstrap core CSS-->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-  
-   <!-- Fontawesome -->
+
+    <!-- Fontawesome -->
   <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"> 
-  
-  <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 100%;
-      }
-
-      #latlon-display
-      {
-        margin-left:auto;
-      }
-      #parcel-number-display
-      {
-        margin-right:auto;
-      }
-
-      html, body {
-		display: flex;
-		flex-direction: column;
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-      }
-	  
-	  #info-box {		
-		display: grid;
-      }
-	  
-	  .info-panel {
-		display: grid;
-	  }
-	  
-	  .info-title {
-		grid-column-start: 1;
-		padding: .5em;
-	  }
-	  
-	  .info-content {
-		grid-column-start: 3;
-		padding: .5em;
-	  }
-	  
-	  .content-wrapper, .content-wrapper > .container-fluid, .content-wrapper > .container-fluid > .row  {
-		height: 100%;
-    }
-
-    .form-group.required .control-label:after {
-      content:"*";
-      color:red;
-    }
-
-    .nav-item {
-      font-size: 1.25rem;
-    }
-
-		@media (max-width: 768px) {
-      .navbar-content {
-      margin-bottom: 15rem; /* Modify this when nav needs more changes */
-     }
-     .navbar-brand {
-       content:"Apache County GIS"
-     }
-
-     .navbar-brand img {
-        display:none !important;
-     }
-
-     .footer {
-       display:none !important;
-     }
-    }
-
-    @media (min-width: 769px) {
-      .navbar-content {
-      display: flex;
-      width: 100%;
-     }
-     .search-form {
-       margin-left: auto;
-     }
-
-    .navbar-brand span {
-        display:none !important;
-     }
-    }
-    </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -153,7 +67,7 @@
 	<div class="py-2 h-100 d-flex flex-column bg-light text-dark">
       <div id="map"></div>
       <footer class="footer d-flex mt-auto p-2 align-items-center justify-content-center">
-       <span id="parcel-num-display">&nbsp;</span><span id="latlon-display">&nbsp;</span>
+       <span><small>Copyright © gis.apachecounty.org</small></span><span id="parcel-num-display">&nbsp;</span><span id="latlon-display">&nbsp;</span>
       </footer>
 	</div>	
 	
