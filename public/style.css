@@ -1,4 +1,9 @@
+/* Mobile */
 @media (max-width: 768px) {
+    #logo-container {
+        display:none;
+    }
+
     .navbar-content {
         margin-bottom: 15rem; /* Modify this when nav needs more changes */
     }
@@ -16,6 +21,7 @@
     }
 }
 
+/* Desktop */
 @media (min-width: 769px) {
     .navbar-content {
         display: flex;
@@ -44,13 +50,17 @@
     margin-left:auto;
 }
 
+#logo-container {
+    position: absolute;
+    z-index: 1000;
+    right: 0%;
+    top: 3rem;
+    padding: 1em;
+}
+
 .form-group.required .control-label:after {
     content:"*";
     color:red;
-}
-
-.nav-item {
-    font-size: 1.25rem;
 }
 
 html, body {
