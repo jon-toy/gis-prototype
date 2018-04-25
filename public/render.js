@@ -249,7 +249,7 @@ function showFeature(feature)
 	renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
 	renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
 	renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
-	//renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number atm
+	//renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
 	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
 	renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
 	renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));
