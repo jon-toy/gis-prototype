@@ -216,8 +216,12 @@ function showFeature(feature)
 	map.data.revertStyle();
 	map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
 	
+	// Feature properties that we need to get in advance
 	var parcel = feature.getProperty('PARCEL_NUM');
 	var account_number = feature.getProperty('NUMBER');
+	var township = feature.getProperty('TOWNSHIP');
+	var range = feature.getProperty('RANGE');
+	var sec_no = feature.getProperty('SEC_NO');
 
 	var info_box = document.getElementById('parcel_content');
 	info_box.innerHTML = "";
@@ -225,22 +229,33 @@ function showFeature(feature)
 	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
 
 	renderProperty(info_box, "Parcel", parcel);
-	if ( account_number ) renderProperty(info_box, "Parcel Information", '<a target="_blank" href="http://eagleweb.assessor.co.apache.az.us/assessor/taxweb/account.jsp?guest=true&accountNum=' + account_number + '">' + account_number + '</a>')
+	if ( account_number )
+	{
+		var parcel_info_string = "";
+
+		if ( township ) parcel_info_string += "Township " + township + " ";
+		if ( range ) parcel_info_string += "Range " + range + " ";
+		if ( sec_no ) parcel_info_string += "Section " + sec_no + " ";
+
+		if ( parcel_info_string.length <= 0 ) parcel_info_string = account_number;
+
+		renderProperty(info_box, "Parcel Information", '<a target="_blank"' + 
+			'href="http://eagleweb.assessor.co.apache.az.us/assessor/taxweb/account.jsp?guest=true&accountNum=' +
+			account_number + '">' + parcel_info_string + '</a>')
+	}
+
 	renderProperty(info_box, "Description", feature.getProperty('DESCRIPTIO'));
 	renderProperty(info_box, "FCV", feature.getProperty('FCV'));
 	renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
 	renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
 	renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
-	renderProperty(info_box, "Account Number", feature.getProperty('NUMBER'));
+	//renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number atm
 	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
 	renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
 	renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));
 	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
 	renderProperty(info_box, "Size", feature.getProperty('SIZE'));
 	renderProperty(info_box, "State", feature.getProperty('STATE'));
-	renderProperty(info_box, "Township", feature.getProperty('TOWNSHIP'));
-	renderProperty(info_box, "Range", feature.getProperty('RANGE'));
-	renderProperty(info_box, "Section No.", feature.getProperty('SEC_NO'));
 	
 	$("#parcelModal").modal("show");
 
