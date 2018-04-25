@@ -13,6 +13,8 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 })
 
+app.use(express.static(__dirname + '/public'));
+
 app.get('/get-maps', function(req, res) {
 	superagent_request
 		.get(data_api_url + '/list')
@@ -91,9 +93,6 @@ app.post('/submit-feedback',function(req,res) {
 		}
   });
 });
-
-
-app.use(express.static('public'));
 
 app.listen(3000, function () {
   console.log('Test app listening on port 3000!');
