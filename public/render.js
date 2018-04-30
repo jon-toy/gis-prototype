@@ -72,7 +72,7 @@ function initPage()
 
 		for ( var i = 0; i < data.body.files.length; i++ ) 
 		{
-			geo_json_urls.push(data.host + "/maps/" + data.body.files[i]);
+			geo_json_urls.push(data.host + "/books/" + data.body.files[i]);
 		}
 
 		// Create the Map object
@@ -138,7 +138,7 @@ function initMap(my_lat_lon)
 
 	// Set colors
 	map.data.setStyle(function(feature) {
-		var color = 'gray';
+		var color = 'blue';
 		return /** @type {google.maps.Data.StyleOptions} */({
 		  fillColor: color,
 		  strokeColor: color,
@@ -214,7 +214,7 @@ function initMap(my_lat_lon)
 function showFeature(feature)
 {	  
 	map.data.revertStyle();
-	map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
+	map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'blue', strokeColor:'blue'});
 	
 	// Feature properties that we need to get in advance
 	var parcel = feature.getProperty('PARCEL_NUM');
@@ -249,7 +249,7 @@ function showFeature(feature)
 	renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
 	renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
 	renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
-	//renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
+	renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
 	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
 	renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
 	renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));

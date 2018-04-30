@@ -17,7 +17,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/get-maps', function(req, res) {
 	superagent_request
-		.get(data_api_url + '/list')
+		.get(data_api_url + '/books')
 		.end(function (er, in_res) {
 			if (er) 
 			{
