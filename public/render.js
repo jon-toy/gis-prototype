@@ -5,6 +5,9 @@ var geo_json_urls = []; // URLs for all the GeoJSON objects after listing the re
 						// Global so we can access it in callbacks
 var all_features = []; // Unreliable on page load. Used for calls to action after page render
 var parcel_num_markers = []; // Store references to all markers currently on the page so we can manipulate en masse
+var cons = [];
+var fires = [];
+var user_lat_lon = null;
 
 $(document).ready(function() {
 	initFeedback();
@@ -69,14 +72,18 @@ function initPage()
 	$.get("/get-maps", function(data, status)
 	{
 		geo_json_urls = [];
-
+		var api_host = null;
 		for ( var i = 0; i < data.body.files.length; i++ ) 
 		{
+			if ( api_host == null ) api_host = data.host;
 			geo_json_urls.push(data.host + "/books/" + data.body.files[i]);
 		}
 
 		// Create the Map object
 		initMap(null);
+
+		// Load sheriff specific GeoJSONs
+		initSheriff(api_host);
 		
 		// Load the GeoJSONs
 		for ( var i = 0; i < geo_json_urls.length; i++ )
@@ -84,6 +91,7 @@ function initPage()
 			$.getJSON(geo_json_urls[i], function (data) 
 			{
 				var selected_feature = null;
+
 				 var features = map.data.addGeoJson(data);
 				 $.each( features, function( index, feature ) {
 					  if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
@@ -100,6 +108,21 @@ function initPage()
 				}
 			});
 		}		
+	});
+}
+
+function initSheriff(api_host)
+{
+	var buffer = new google.maps.Data();
+
+	$.getJSON(api_host + "/sheriff/con.json", function (data) 
+	{
+		cons = buffer.addGeoJson(data);
+	});
+
+	$.getJSON(api_host + "/sheriff/fire.json", function (data) 
+	{
+		fires = buffer.addGeoJson(data);
 	});
 }
 
@@ -174,10 +197,10 @@ function initMap(my_lat_lon)
 	
 	function geoInit(position)
 	{
-		var geoLatLon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+		user_lat_lon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 		
 		 var userMarker = new google.maps.Marker({
-				position: geoLatLon,
+				position: user_lat_lon,
 				map: map,
 				icon: "/geolocation-icon.png"
 			});
@@ -256,6 +279,7 @@ function showFeature(feature)
 	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
 	renderProperty(info_box, "Size", feature.getProperty('SIZE'));
 	renderProperty(info_box, "State", feature.getProperty('STATE'));
+	renderProperty(info_box, "CON", getCon(feature));
 	
 	$("#parcelModal").modal("show");
 
@@ -279,6 +303,36 @@ function showFeature(feature)
 		row.appendChild(content_container);
 
 		container.appendChild(row);
+	}
+
+	function getFireDistrict(feature)
+	{
+
+	}
+
+	function getCon(parcel)
+	{
+		var parcel_geom = parcel.getGeometry();
+		var parcel_poly = new google.maps.Polygon({
+			paths: parcel_geom.getAt(0).getArray(),
+		});
+
+		var ret = null;
+
+		$.each( cons, function( index, con ) {
+			var con_geom = con.getGeometry();
+			var con_poly = new google.maps.Polygon({
+				paths: con_geom.getAt(0).getArray(),
+			});
+
+			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), con_poly) == true )
+			{
+				ret = con.getProperty("CON_NUMBER") + " " + con.getProperty("CON_NAME");
+				return;
+			}
+		});
+
+		return ret;
 	}
 }
 
@@ -418,4 +472,12 @@ function goToLatLon()
 		position: my_lat_lon,
 		map: map
 	  });
+}
+
+function jumpToUserLatLon()
+{
+	if ( user_lat_lon == null ) return;
+
+	map.panTo(user_lat_lon);
+	map.setZoom(18);
 }
