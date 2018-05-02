@@ -121,6 +121,36 @@ function initPage()
 			});
 		}	
 	});
+
+	$('#search-by-parcel-number-button').click(function(event) {
+
+        // Stop the Search input reloading the page by preventing its default action
+		event.preventDefault();
+		
+		onSearchByParcelNo();
+	});
+
+	/**
+	 * Handler for Search By Parcel Number box. Loops through collection of all features and
+	 * checks if the value in the box matches with any Parcel Numbers (exact match).
+	 */
+	function onSearchByParcelNo()
+	{
+		var parcel_num = document.getElementById("search-by-parcel-number").value;
+		if ( parcel_num == null || parcel_num.length <= 0 ) return;
+
+		for ( var i = 0; i < all_features.length; i++ ) 
+		{
+			var feature = all_features[i];
+			
+			if ( feature.getProperty('PARCEL_NUM') == parcel_num )
+			{
+				showFeature(feature);
+
+				return;
+			}
+		}
+	}
 }
 
 function initSheriff(api_host)
@@ -423,29 +453,6 @@ function getPolygonCenter(poly)
 	center_x = lowx + ((highx-lowx) / 2);
 	center_y = lowy + ((highy - lowy) / 2);
 	return (new google.maps.LatLng(center_x, center_y));
-}
-
-/**
- * Handler for Search By Parcel Number box. Loops through collection of all features and
- * checks if the value in the box matches with any Parcel Numbers (exact match).
- */
-function onSearchByParcelNo()
-{
-	event.preventDefault();
-	var parcel_num = document.getElementById("search-by-parcel-number").value;
-	if ( parcel_num == null || parcel_num.length <= 0 ) return;
-
-	for ( var i = 0; i < all_features.length; i++ ) 
-	{
-		var feature = all_features[i];
-		
-		if ( feature.getProperty('PARCEL_NUM') == parcel_num )
-		{
-			showFeature(feature);
-
-			return;
-		}
-	}
 }
 
 /**
