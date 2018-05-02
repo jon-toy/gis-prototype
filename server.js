@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const data_api_url = 'http://ec2-54-183-132-79.us-west-1.compute.amazonaws.com:3001';
 const nodemailer = require('nodemailer');
+const redis = require('redis');
+const redis_client = redis.createClient(); // this creates a new client
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
