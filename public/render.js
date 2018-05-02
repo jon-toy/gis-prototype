@@ -251,8 +251,8 @@ function showFeature(feature)
 
 	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
 
-	renderProperty(info_box, "Parcel", parcel);
-	if ( account_number )
+	// renderProperty(info_box, "Parcel", parcel);
+	/* if ( account_number )
 	{
 		var parcel_info_string = "";
 
@@ -265,21 +265,23 @@ function showFeature(feature)
 		renderProperty(info_box, "Parcel Information", '<a target="_blank"' + 
 			'href="http://eagleweb.assessor.co.apache.az.us/assessor/taxweb/account.jsp?guest=true&accountNum=' +
 			account_number + '">' + parcel_info_string + '</a>')
-	}
+	} */
 
-	renderProperty(info_box, "Description", feature.getProperty('DESCRIPTIO'));
-	renderProperty(info_box, "FCV", feature.getProperty('FCV'));
-	renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
-	renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
-	renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
-	renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
-	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
-	renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
-	renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));
 	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
-	renderProperty(info_box, "Size", feature.getProperty('SIZE'));
-	renderProperty(info_box, "State", feature.getProperty('STATE'));
 	renderProperty(info_box, "CON", getCon(feature));
+	// TODO: Add Fire District
+	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
+	renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
+	renderProperty(info_box, "Size", feature.getProperty('SIZE') + " acres");
+
+	// renderProperty(info_box, "Description", feature.getProperty('DESCRIPTIO'));
+	// renderProperty(info_box, "FCV", feature.getProperty('FCV'));
+	// renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
+	// renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
+	// renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
+	// renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
+	// renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));
+	// renderProperty(info_box, "State", feature.getProperty('STATE'));
 	
 	$("#parcelModal").modal("show");
 
