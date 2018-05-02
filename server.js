@@ -38,9 +38,8 @@ app.get('/get-maps', function(req, res) {
 			// Only load a certain amount of books so we can debug faster locally
 			if ( in_dev == true )
 			{
-				res_json.body.files.splice(0, res_json.body.files.length - 2 - NUM_BOOKS_TO_LOAD);
-				/*res_json.body.files = [];
-				res_json.body.files.push('101.json');*/
+				//res_json.body.files.splice(0, res_json.body.files.length - 2 - NUM_BOOKS_TO_LOAD);
+				res_json.body.files = []; res_json.body.files.push('101.json');
 			}
 
 			res.json(res_json);

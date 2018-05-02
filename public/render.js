@@ -92,20 +92,26 @@ function initPage()
 			$.getJSON(geo_json_urls[i], function (data) 
 			{
 				var selected_feature = null;
-
-				 var features = map.data.addGeoJson(data);
-				 $.each( features, function( index, feature ) {
-					  if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
-						{
-							showFeature(feature);
-							selected_feature = feature;
-						}
-					});
-				all_features = all_features.concat(features);
-				
-				if ( selected_feature != null ) 
+				try
 				{
-					selectFeature(selected_feature);
+					var features = map.data.addGeoJson(data);
+					$.each( features, function( index, feature ) {
+						if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
+							{
+								showFeature(feature);
+								selected_feature = feature;
+							}
+						});
+					all_features = all_features.concat(features);
+					
+					if ( selected_feature != null ) 
+					{
+						selectFeature(selected_feature);
+					}
+				}
+				catch(err)
+				{
+					console.log(err);
 				}
 
 				load_completed.push(true);
@@ -473,19 +479,26 @@ function goToLatLon()
 		var poly = new google.maps.Polygon({
 			paths: geom.getAt(0).getArray(),
 		});
-		if ( google.maps.geometry.poly.containsLocation(my_lat_lon, poly) == true )
+		try
 		{
-			if ( document.getElementById("view-parcel-for-lat-lon").checked == true )
+			if ( google.maps.geometry.poly.containsLocation(my_lat_lon, poly) == true )
 			{
-				// Show the info
-				showFeature(feature);
+				if ( document.getElementById("view-parcel-for-lat-lon").checked == true )
+				{
+					// Show the info
+					showFeature(feature);
+				}
+				else
+				{
+					// Just highlight the nearest parcel
+					map.data.revertStyle();
+					map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
+				}
 			}
-			else
-			{
-				// Just highlight the nearest parcel
-				map.data.revertStyle();
-				map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-			}
+		}
+		catch(err)
+		{
+			console.log(err);
 		}
 	});
 
