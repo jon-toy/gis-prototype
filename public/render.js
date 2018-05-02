@@ -480,12 +480,13 @@ function goToLatLon()
 	  });
 	
 	$.each( all_features, function( index, feature ) {
-		var geom = feature.getGeometry();
-		var poly = new google.maps.Polygon({
-			paths: geom.getAt(0).getArray(),
-		});
 		try
 		{
+			var geom = feature.getGeometry();
+			var poly = new google.maps.Polygon({
+				paths: geom.getAt(0).getArray(),
+			});
+
 			if ( google.maps.geometry.poly.containsLocation(my_lat_lon, poly) == true )
 			{
 				if ( document.getElementById("view-parcel-for-lat-lon").checked == true )
@@ -503,7 +504,8 @@ function goToLatLon()
 		}
 		catch(err)
 		{
-			console.log(err);
+			console.error("Error with " + feature.getProperty('PARCEL_NUM'));
+			console.error(err);
 		}
 	});
 }
