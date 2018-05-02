@@ -143,7 +143,8 @@ function initMap(my_lat_lon)
 
 	// Highlight the parcels
 	map.data.addListener('mouseover', function(event) {
-		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
+		var color = '#28a745';
+		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
 		displayCoordinates(event.latLng);
 		displayParcel(event.feature);
 	  });
@@ -161,11 +162,11 @@ function initMap(my_lat_lon)
 
 	// Set colors
 	map.data.setStyle(function(feature) {
-		var color = 'blue';
+		var color = '#007bff';
 		return /** @type {google.maps.Data.StyleOptions} */({
 		  fillColor: color,
 		  strokeColor: color,
-		  strokeWeight: 2
+		  strokeWeight: 3
 		});
 	  });
 
@@ -173,6 +174,7 @@ function initMap(my_lat_lon)
 	google.maps.event.addListener(map, 'mousemove', function (event) {
 	  displayCoordinates(event.latLng);               
 	});
+
 
 	// Wipe out the labels after we zoom out enough so it doesn't clutter the map
 	map.addListener('zoom_changed', function() {
@@ -242,52 +244,28 @@ function showFeature(feature)
 	// Feature properties that we need to get in advance
 	var parcel = feature.getProperty('PARCEL_NUM');
 	var account_number = feature.getProperty('NUMBER');
-	var township = feature.getProperty('TOWNSHIP');
-	var range = feature.getProperty('RANGE');
-	var sec_no = feature.getProperty('SEC_NO');
 
 	var info_box = document.getElementById('parcel_content');
 	info_box.innerHTML = "";
 
 	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
 
-	// renderProperty(info_box, "Parcel", parcel);
-	/* if ( account_number )
-	{
-		var parcel_info_string = "";
-
-		if ( township ) parcel_info_string += "Township " + township + " ";
-		if ( range ) parcel_info_string += "Range " + range + " ";
-		if ( sec_no ) parcel_info_string += "Section " + sec_no + " ";
-
-		if ( parcel_info_string.length <= 0 ) parcel_info_string = account_number;
-
-		renderProperty(info_box, "Parcel Information", '<a target="_blank"' + 
-			'href="http://eagleweb.assessor.co.apache.az.us/assessor/taxweb/account.jsp?guest=true&accountNum=' +
-			account_number + '">' + parcel_info_string + '</a>')
-	} */
-
 	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
 	renderProperty(info_box, "CON", getCon(feature));
-	// TODO: Add Fire District
+	renderProperty(info_box, "Fire District", getFireDistrict(feature));
+	renderProperty(info_box, "", "", "border-top my-3");
 	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
-	renderProperty(info_box, "Account Number", feature.getProperty('NUMBER')); // No need to get the account number
-	renderProperty(info_box, "Size", feature.getProperty('SIZE') + " acres");
+	renderProperty(info_box, "Account Information", account_number);
+	renderProperty(info_box, "Size", feature.getProperty('SIZE') + " Ac.");
 
-	// renderProperty(info_box, "Description", feature.getProperty('DESCRIPTIO'));
-	// renderProperty(info_box, "FCV", feature.getProperty('FCV'));
-	// renderProperty(info_box, "Legal", feature.getProperty('LEGAL'));
-	// renderProperty(info_box, "Line 1", feature.getProperty('LINE_1'));
-	// renderProperty(info_box, "Line 2", feature.getProperty('LINE_2'));
-	// renderProperty(info_box, "Owner City", feature.getProperty('OWNER_CITY'));
-	// renderProperty(info_box, "Owner Zip", feature.getProperty('OWNER_ZIP'));
-	// renderProperty(info_box, "State", feature.getProperty('STATE'));
+	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
+	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
 	
 	$("#parcelModal").modal("show");
 
 	selectFeature(feature);
 
-	function renderProperty(container, title, content)
+	function renderProperty(container, title, content, css_classes)
 	{
 		if ( content == null ) return;
 
@@ -304,12 +282,34 @@ function showFeature(feature)
 		content_container.innerHTML = content;
 		row.appendChild(content_container);
 
+		if ( css_classes ) row.className = css_classes;
+
 		container.appendChild(row);
 	}
 
-	function getFireDistrict(feature)
+	function getFireDistrict(parcel)
 	{
+		var parcel_geom = parcel.getGeometry();
+		var parcel_poly = new google.maps.Polygon({
+			paths: parcel_geom.getAt(0).getArray(),
+		});
 
+		var ret = null;
+
+		$.each( fires, function( index, fire ) {
+			var fire_geom = fire.getGeometry();
+			var fire_poly = new google.maps.Polygon({
+				paths: fire_geom.getAt(0).getArray(),
+			});
+
+			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), fire_poly) == true )
+			{
+				ret = fire.getProperty("DISTRICT");
+				return;
+			}
+		});
+
+		return ret;
 	}
 
 	function getCon(parcel)

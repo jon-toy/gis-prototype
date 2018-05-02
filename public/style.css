@@ -70,3 +70,7 @@ html, body {
     margin: 0;
     padding: 0;
 }
+
+.modal-footer button[disabled] {
+    cursor: not-allowed;
+}
