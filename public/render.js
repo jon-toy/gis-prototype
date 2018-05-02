@@ -85,6 +85,7 @@ function initPage()
 		// Load sheriff specific GeoJSONs
 		initSheriff(api_host);
 		
+		var load_completed = [];
 		// Load the GeoJSONs
 		for ( var i = 0; i < geo_json_urls.length; i++ )
 		{
@@ -106,8 +107,19 @@ function initPage()
 				{
 					selectFeature(selected_feature);
 				}
+
+				load_completed.push(true);
+
+				if ( load_completed.length == geo_json_urls.length ) 
+				{
+					$(".loading").fadeOut(1500);
+				}
+				else
+				{
+					document.getElementById("loading-message").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
+				}
 			});
-		}		
+		}	
 	});
 }
 
