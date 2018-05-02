@@ -473,6 +473,11 @@ function goToLatLon()
 
 	map.panTo(my_lat_lon);
 	map.setZoom(18);	
+
+	var marker = new google.maps.Marker({
+		position: my_lat_lon,
+		map: map
+	  });
 	
 	$.each( all_features, function( index, feature ) {
 		var geom = feature.getGeometry();
@@ -501,11 +506,6 @@ function goToLatLon()
 			console.log(err);
 		}
 	});
-
-	var marker = new google.maps.Marker({
-		position: my_lat_lon,
-		map: map
-	  });
 }
 
 function jumpToUserLatLon()

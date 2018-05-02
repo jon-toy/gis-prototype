@@ -21,7 +21,7 @@ app.get('/', function (req, res) {
 app.use(express.static(__dirname + '/public'));
 
 app.get('/get-maps', function(req, res) {
-	if ( req.host == 'localhost' ) in_dev = true;
+	//if ( req.host == 'localhost' ) in_dev = true;
 	superagent_request
 		.get(data_api_url + '/books')
 		.end(function (er, in_res) {
