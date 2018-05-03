@@ -50,7 +50,7 @@ app.post('/submit-feedback',function(req,res) {
   // g-recaptcha-response is the key that browser will generate upon form submit.
   // if its blank or null means user has not selected the captcha, so return the error.
   if(req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
-    return res.json({"responseCode" : 1,"responseDesc" : "Please select captcha"});
+    return res.json({"responseCode" : 1, "success" : false, "message" : "Please fill out the recaptcha."});
 	}
 	
   // Put your secret key here.

@@ -55,8 +55,11 @@ function initFeedback()
 		{
 			alert(response.message);
 		}
+
+		grecaptcha.reset();
 	   }
 	  });
+
 	  //Very important line, it disable the page refresh.
 	  return false;
 	});
