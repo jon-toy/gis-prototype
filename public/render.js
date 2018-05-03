@@ -122,7 +122,7 @@ function initPage()
 				}
 				else
 				{
-					document.getElementById("loading-message").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
+					document.getElementById("loading-message-status").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
 				}
 			});
 		}	
