@@ -311,6 +311,11 @@ function showFeature(feature)
 	// Feature properties that we need to get in advance
 	var parcel = feature.getProperty('PARCEL_NUM');
 	var account_number = feature.getProperty('NUMBER');
+	var owner = feature.getProperty('OWNER');
+	var size = feature.getProperty('SIZE');
+	if ( size ) size += " Ac."
+
+	var show_mid_bar = ( account_number && owner && size );
 
 	var info_box = document.getElementById('parcel_content');
 	info_box.innerHTML = "";
@@ -320,10 +325,10 @@ function showFeature(feature)
 	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
 	renderProperty(info_box, "CON", getCon(feature));
 	renderProperty(info_box, "Fire District", getFireDistrict(feature));
-	renderProperty(info_box, "", "", "border-top my-3");
-	renderProperty(info_box, "Owner", feature.getProperty('OWNER'));
+	if ( show_mid_bar == true ) renderProperty(info_box, "", "", "border-top my-3");
+	renderProperty(info_box, "Owner", owner);
 	renderProperty(info_box, "Account Information", account_number);
-	renderProperty(info_box, "Size", feature.getProperty('SIZE') + " Ac.");
+	renderProperty(info_box, "Size", size);
 
 	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
 	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
