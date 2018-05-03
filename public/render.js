@@ -119,6 +119,14 @@ function initPage()
 				if ( load_completed.length == geo_json_urls.length ) 
 				{
 					$(".loading").fadeOut(1500);
+					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
+					{
+						// Don't fade the logo in on mobile
+					}
+					else
+					{
+						$("#logo-container").fadeIn(2500);
+					}
 				}
 				else
 				{
