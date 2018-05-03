@@ -125,7 +125,7 @@ function initPage()
 					}
 					else
 					{
-						$("#logo-container").fadeIn(2500);
+						$("#logo-container").fadeIn(1500);
 					}
 				}
 				else
