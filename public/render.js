@@ -8,6 +8,7 @@ var parcel_num_markers = []; // Store references to all markers currently on the
 var cons = [];
 var fires = [];
 var user_lat_lon = null;
+var current_parcel_marker = null;
 
 $(document).ready(function() {
 	initFeedback();
@@ -203,10 +204,17 @@ function initMap(my_lat_lon)
 		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
 		displayCoordinates(event.latLng);
 		displayParcel(event.feature);
+
+		current_parcel_marker = labelFeature(event.feature, true);
 	  });
 
 	map.data.addListener('mouseout', function(event) {
 		map.data.revertStyle();
+
+		if ( current_parcel_marker != null )
+		{
+			current_parcel_marker.setMap(null);
+		}
 	});
 	
 
@@ -398,9 +406,9 @@ function showFeature(feature)
  * Draw a label on the map. The contents of the label are the feature's PARCEL_NUM property
  * @param {*} feature 
  */
-function labelFeature(feature)
+function labelFeature(feature, ignore_zoom_restriction)
 {
-	if ( map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD ) return; // Don't show labels when zoomed out so much
+	if ( ignore_zoom_restriction != true && map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD ) return; // Don't show labels when zoomed out so much
 	// Place a marker on there
 	var geom = feature.getGeometry();
 	var poly = new google.maps.Polygon({
@@ -417,6 +425,8 @@ function labelFeature(feature)
 	});
 
 	parcel_num_markers.push(marker);
+
+	return marker;
 }
 
 /**

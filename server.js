@@ -8,7 +8,6 @@ const nodemailer = require('nodemailer');
 const redis = require('redis');
 const redis_client = redis.createClient(); // this creates a new client
 
-const NUM_BOOKS_TO_LOAD = 20; // Lighten the load for dev
 var in_dev = false;
 
 app.use(bodyParser.json());
@@ -21,7 +20,7 @@ app.get('/', function (req, res) {
 app.use(express.static(__dirname + '/public'));
 
 app.get('/get-maps', function(req, res) {
-	//if ( req.host == 'localhost' ) in_dev = true;
+	if ( req.host == 'localhost' ) in_dev = true;
 	superagent_request
 		.get(data_api_url + '/books')
 		.end(function (er, in_res) {
