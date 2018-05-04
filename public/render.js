@@ -76,10 +76,9 @@ function initPage()
 	$.get("/get-maps", function(data, status)
 	{
 		geo_json_urls = [];
-		var api_host = null;
+		var api_host = data.host;
 		for ( var i = 0; i < data.body.files.length; i++ ) 
 		{
-			if ( api_host == null ) api_host = data.host;
 			geo_json_urls.push(data.host + "/books/" + data.body.files[i]);
 		}
 
@@ -99,13 +98,16 @@ function initPage()
 				try
 				{
 					var features = map.data.addGeoJson(data);
-					$.each( features, function( index, feature ) {
-						if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
-							{
-								showFeature(feature);
-								selected_feature = feature;
-							}
-						});
+					if ( getUrlParam('parcel') != null ) 
+					{
+						$.each( features, function( index, feature ) {
+							if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
+								{
+									showFeature(feature);
+									selected_feature = feature;
+								}
+							});
+					}
 					all_features = all_features.concat(features);
 					
 					if ( selected_feature != null ) 
@@ -122,14 +124,14 @@ function initPage()
 
 				if ( load_completed.length == geo_json_urls.length ) 
 				{
-					//$(".loading").fadeOut(1500);
+					$(".loading").fadeOut(1500);
 					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
 					{
 						// Don't fade the logo in on mobile
 					}
 					else
 					{
-						//$("#logo-container").fadeIn(1500);
+						$("#logo-container").fadeIn(1500);
 					}
 				}
 				else
