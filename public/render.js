@@ -160,8 +160,26 @@ function initPage()
 		for ( var i = 0; i < all_features.length; i++ ) 
 		{
 			var feature = all_features[i];
+
+			// Sanitize the input value
+			var sanitized_input = parcel_num.replace('-', '');
+			while ( sanitized_input.indexOf('-') >= 0 )
+			{
+				sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
+			}
+			sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
+
+			// Sanitize the current parcel's parcel number
+			var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
+			sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', '');
+			while ( sanitized_feature_parcel_num.indexOf('-') >= 0 )
+			{
+				sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', ''); // Search ignores hyphens
+			}
+			sanitized_feature_parcel_num = sanitized_feature_parcel_num.toUpperCase(); // Search ignores case
 			
-			if ( feature.getProperty('PARCEL_NUM') == parcel_num )
+			// Compare
+			if ( sanitized_input == sanitized_feature_parcel_num )
 			{
 				showFeature(feature);
 
