@@ -66,80 +66,22 @@ function initFeedback()
 }  
 
 /**
- * Called by Google Maps API after its loaded. Makes a call out to the server to get a list
- * of the GeoJSONs, then calls out to the data API to grab the GeoJSONs individually and
- * load them asynchonously
+ * Called by Google Maps API after its loaded. Loads the Zones GeoJSON to draw the zones
  */
 function initPage()
 {
-	// Get GeoJSON list
-	$.get("/get-maps", function(data, status)
+	// Create the Map object
+	initMap(null);
+
+	// Load the Zone GeoJSON
+	$.getJSON("https://apachecounty.org/zones/zones.json", function (data) 
 	{
-		geo_json_urls = [];
-		var api_host = data.host;
-		for ( var i = 0; i < data.body.files.length; i++ ) 
+		var zones = map.data.addGeoJson(data);
+
+		for ( var i = 0; i < zones.length; i++ ) 
 		{
-			geo_json_urls.push(data.host + "/books/" + data.body.files[i]);
+			labelFeature(zones[i]);
 		}
-
-		// Create the Map object
-		initMap(null);
-
-		// Load sheriff specific GeoJSONs
-		initSheriff(api_host);
-		
-		var load_completed = [];
-		// Load the GeoJSONs
-		for ( var i = 0; i < geo_json_urls.length; i++ )
-		{
-			$.getJSON(geo_json_urls[i], function (data) 
-			{
-				var selected_feature = null;
-				try
-				{
-					var features = map.data.addGeoJson(data);
-					if ( getUrlParam('parcel') != null ) 
-					{
-						$.each( features, function( index, feature ) {
-							if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
-								{
-									showFeature(feature);
-									selected_feature = feature;
-								}
-							});
-					}
-					all_features = all_features.concat(features);
-					
-					if ( selected_feature != null ) 
-					{
-						selectFeature(selected_feature);
-					}
-				}
-				catch(err)
-				{
-					console.log(err);
-				}
-
-				load_completed.push(true);
-
-				if ( load_completed.length == geo_json_urls.length ) 
-				{
-					$(".loading").fadeOut(1500);
-					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
-					{
-						// Don't fade the logo in on mobile
-					}
-					else
-					{
-						$("#logo-container").fadeIn(1500);
-					}
-				}
-				else
-				{
-					document.getElementById("loading-message-status").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
-				}
-			});
-		}	
 	});
 
 	$('#search-by-parcel-number-button').click(function(event) {
@@ -156,6 +98,7 @@ function initPage()
 	 */
 	function onSearchByParcelNo()
 	{
+		return; // Disable this on the zones page for now
 		var parcel_num = document.getElementById("search-by-parcel-number").value;
 		if ( parcel_num == null || parcel_num.length <= 0 ) return;
 
@@ -191,21 +134,6 @@ function initPage()
 	}
 }
 
-function initSheriff(api_host)
-{
-	var buffer = new google.maps.Data();
-
-	$.getJSON(api_host + "/sheriff/con.json", function (data) 
-	{
-		cons = buffer.addGeoJson(data);
-	});
-
-	$.getJSON(api_host + "/sheriff/fire.json", function (data) 
-	{
-		fires = buffer.addGeoJson(data);
-	});
-}
-
 /**
  * Create the map object and set up the listeners
  * @param {*} my_lat_lon 
@@ -220,6 +148,11 @@ function initMap(my_lat_lon)
 	  zoom: FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD,
 	  fullscreenControl: false
 	});
+
+	var marker = new google.maps.Marker({
+		position: my_lat_lon,
+		map: map
+	  });
 
 	// Highlight the parcels
 	map.data.addListener('mouseover', function(event) {
@@ -319,118 +252,6 @@ function initMap(my_lat_lon)
 }
 
 /**
- * Parse out properties from the feature, place those properties into the Parcel Modal,
- * and show it.
- * @param {*} feature 
- */
-function showFeature(feature)
-{	  
-	map.data.revertStyle();
-	map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'blue', strokeColor:'blue'});
-	
-	// Feature properties that we need to get in advance
-	var parcel = feature.getProperty('PARCEL_NUM');
-	var account_number = feature.getProperty('NUMBER');
-	var owner = feature.getProperty('OWNER');
-	var size = feature.getProperty('SIZE');
-	if ( size ) size += " Ac."
-
-	var show_mid_bar = ( account_number && owner && size );
-
-	var info_box = document.getElementById('parcel_content');
-	info_box.innerHTML = "";
-
-	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
-
-	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
-	renderProperty(info_box, "CON", getCon(feature));
-	renderProperty(info_box, "Fire District", getFireDistrict(feature));
-	if ( show_mid_bar == true ) renderProperty(info_box, "", "", "border-top my-3");
-	renderProperty(info_box, "Owner", owner);
-	renderProperty(info_box, "Account Information", account_number);
-	renderProperty(info_box, "Size", size);
-
-	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
-	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
-	
-	$("#parcelModal").modal("show");
-
-	selectFeature(feature);
-
-	function renderProperty(container, title, content, css_classes)
-	{
-		if ( content == null ) return;
-
-		var row = document.createElement('div');
-		row.className = "row p-2";
-
-		var title_container = document.createElement('div');
-		title_container.className = 'col-3';
-		title_container.innerHTML = '<b>' + title + '</b>';
-		row.appendChild(title_container);
-
-		var content_container = document.createElement('div');
-		content_container.className = 'col-9';
-		content_container.innerHTML = content;
-		row.appendChild(content_container);
-
-		if ( css_classes ) row.className = css_classes;
-
-		container.appendChild(row);
-	}
-
-	function getFireDistrict(parcel)
-	{
-		var parcel_geom = parcel.getGeometry();
-		var parcel_poly = new google.maps.Polygon({
-			paths: parcel_geom.getAt(0).getArray(),
-		});
-
-		var ret = null;
-
-		$.each( fires, function( index, fire ) {
-			var fire_geom = fire.getGeometry();
-			var fire_poly = new google.maps.Polygon({
-				paths: fire_geom.getAt(0).getArray(),
-			});
-
-			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), fire_poly) == true )
-			{
-				ret = fire.getProperty("DISTRICT");
-				return;
-			}
-		});
-
-		return ret;
-	}
-
-	function getCon(parcel)
-	{
-		var parcel_geom = parcel.getGeometry();
-		var parcel_poly = new google.maps.Polygon({
-			paths: parcel_geom.getAt(0).getArray(),
-		});
-
-		var ret = null;
-
-		$.each( cons, function( index, con ) {
-			var con_geom = con.getGeometry();
-			var con_poly = new google.maps.Polygon({
-				paths: con_geom.getAt(0).getArray(),
-			});
-
-			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), con_poly) == true )
-			{
-				ret = con.getProperty("CON_NUMBER") + " " + con.getProperty("CON_NAME");
-				return;
-			}
-		});
-
-		return ret;
-	}
-}
-
-/**
  * Draw a label on the map. The contents of the label are the feature's PARCEL_NUM property
  * @param {*} feature 
  */
@@ -448,32 +269,13 @@ function labelFeature(feature, ignore_zoom_restriction)
 	var marker = new google.maps.Marker({
 	  position: center,
 	  map: map,
-	  label: feature.getProperty('PARCEL_NUM'),
+	  label: feature.getProperty('ZONE_NAME'),
 	  icon: "blank.png"
 	});
 
 	parcel_num_markers.push(marker);
 
 	return marker;
-}
-
-/**
- * Change the style of the feature that is selected, and pan to it
- * @param {*} selected_feature 
- */
-function selectFeature(selected_feature)
-{
-	// Style and color the selected feature
-	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-
-	labelFeature(selected_feature);
-
-	var geom = selected_feature.getGeometry();
-	var poly = new google.maps.Polygon({
-		paths: geom.getAt(0).getArray(),
-	});
-	var center = getPolygonCenter(poly);
-	map.panTo(center);
 }
 
 /**
