@@ -140,19 +140,13 @@ function initPage()
  */
 function initMap(my_lat_lon) 
 {
-	if ( my_lat_lon == null ) my_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746); // Starting position
-	;
+	if ( my_lat_lon == null ) my_lat_lon = new google.maps.LatLng(34.600, -109.450); // Starting position
 
-	map = new google.maps.Map(document.getElementById('map'), {
+	map = new google.maps.Map(document.getElementById('zone-map'), {
 	  center: my_lat_lon,
-	  zoom: FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD,
+	  zoom: 9,
 	  fullscreenControl: false
 	});
-
-	var marker = new google.maps.Marker({
-		position: my_lat_lon,
-		map: map
-	  });
 
 	// Highlight the parcels
 	map.data.addListener('mouseover', function(event) {
