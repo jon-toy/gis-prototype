@@ -229,7 +229,7 @@ function initMap(my_lat_lon)
 function goToZone(zone_num)
 {
 	if ( zone_num == null ) return;
-	
+
 	window.open("/zone.html?zone_num=" + zone_num);
 }
 
@@ -256,6 +256,8 @@ function labelFeature(feature, ignore_zoom_restriction)
 	});
 
 	parcel_num_markers.push(marker);
+
+	console.log(feature.getProperty("ZONE") + " " + center);
 
 	return marker;
 }

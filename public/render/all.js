@@ -88,7 +88,10 @@ function initPage()
 		}
 
 		// Create the Map object
-		initMap(null);
+		var starting_lat_lon = null;
+		if ( data.body.starting_lat && data.body.starting_lon ) starting_lat_lon = new google.maps.LatLng(data.body.starting_lat, data.body.starting_lon);
+	
+		initMap(starting_lat_lon, data.body.starting_zoom);
 
 		// Load sheriff specific GeoJSONs
 		initSheriff(api_host);
@@ -215,16 +218,18 @@ function initSheriff(api_host)
 
 /**
  * Create the map object and set up the listeners
- * @param {*} my_lat_lon 
+ * @param {*} starting_lat_lon 
  */
-function initMap(my_lat_lon) 
+function initMap(starting_lat_lon, starting_zoom) 
 {
-	if ( my_lat_lon == null ) my_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746); // Starting position
+	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746); // Starting position
 	;
 
+	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
+
 	map = new google.maps.Map(document.getElementById('map'), {
-	  center: my_lat_lon,
-	  zoom: FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD,
+	  center: starting_lat_lon,
+	  zoom: starting_zoom,
 	  fullscreenControl: false
 	});
 
