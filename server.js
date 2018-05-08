@@ -3,7 +3,7 @@ const app = express();
 const superagent_request = require("superagent");
 const bodyParser = require('body-parser');
 const request = require('request');
-const data_api_url = 'https://apachecounty.org';
+const DATA_API_HOST = 'https://apachecounty.org';
 const nodemailer = require('nodemailer');
 const redis = require('redis');
 const redis_client = redis.createClient(); // this creates a new client
@@ -22,8 +22,12 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/get-maps', function(req, res) {
 	if ( req.host == 'localhost' ) in_dev = true;
+
+	var uri = DATA_API_HOST + '/books';
+	if ( req.query.zone_num && req.query.zone_num != 'all' ) uri += "/zone/" + req.query.zone_num;
+
 	superagent_request
-		.get(data_api_url + '/books')
+		.get(uri)
 		.end(function (er, in_res) {
 			if (er) 
 			{
@@ -32,21 +36,21 @@ app.get('/get-maps', function(req, res) {
 			}
 			
 			var res_json = {};
-			res_json.host = data_api_url;
+			res_json.host = DATA_API_HOST;
 			res_json.body = in_res.body;
 
 			// Only load a certain amount of books so we can debug faster locally
 			if ( in_dev == true )
 			{
 				//res_json.body.files.splice(0, res_json.body.files.length - 4 - NUM_BOOKS_TO_LOAD);
-				res_json.body.files = []; 
+				/*res_json.body.files = []; 
 				res_json.body.files.push('101.json'); 
 				res_json.body.files.push('102.json');
 				res_json.body.files.push('103.json');
 				res_json.body.files.push('104.json');
 				res_json.body.files.push('105.json');
 				res_json.body.files.push('107.json');
-				res_json.body.files.push('108.json');
+				res_json.body.files.push('108.json');*/
 			}
 
 			res.json(res_json);

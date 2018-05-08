@@ -72,14 +72,19 @@ function initFeedback()
  */
 function initPage()
 {
+	var zone_num = getUrlParam("zone_num");
+
+	var uri = "/get-maps";
+	if ( zone_num ) uri += "?zone_num=" + zone_num;
+
 	// Get GeoJSON list
-	$.get("/get-maps", function(data, status)
+	$.get(uri, function(data, status)
 	{
 		geo_json_urls = [];
 		var api_host = data.host;
-		for ( var i = 0; i < data.body.files.length; i++ ) 
+		for ( var i = 0; i < data.body.books.length; i++ ) 
 		{
-			geo_json_urls.push(data.host + "/books/" + data.body.files[i]);
+			geo_json_urls.push(data.host + "/books/" + data.body.books[i]);
 		}
 
 		// Create the Map object

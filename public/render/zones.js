@@ -8,7 +8,6 @@ var parcel_num_markers = []; // Store references to all markers currently on the
 var cons = [];
 var fires = [];
 var user_lat_lon = null;
-var current_parcel_marker = null;
 
 $(document).ready(function() {
 	initFeedback();
@@ -80,7 +79,7 @@ function initPage()
 
 		for ( var i = 0; i < zones.length; i++ ) 
 		{
-			labelFeature(zones[i]);
+			labelFeature(zones[i], true);
 		}
 	});
 
@@ -154,24 +153,17 @@ function initMap(my_lat_lon)
 		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
 		displayCoordinates(event.latLng);
 		displayParcel(event.feature);
-
-		current_parcel_marker = labelFeature(event.feature, true);
 	  });
 
 	map.data.addListener('mouseout', function(event) {
 		map.data.revertStyle();
-
-		if ( current_parcel_marker != null )
-		{
-			current_parcel_marker.setMap(null);
-		}
 	});
 	
 
 	// Show modal on click
 	map.data.addListener('click', function(event) 
 	{			
-		showFeature(event.feature);
+		goToZone(event.feature.getProperty("ZONE"));;
 	});
 
 	// Set colors
@@ -189,19 +181,8 @@ function initMap(my_lat_lon)
 	  displayCoordinates(event.latLng);               
 	});
 
-
-	// Wipe out the labels after we zoom out enough so it doesn't clutter the map
 	map.addListener('zoom_changed', function() {
-		if ( map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD )
-		{
-			// Wipe markers
-			for ( var i = 0; i < parcel_num_markers.length; i++ )
-			{
-				parcel_num_markers[i].setMap(null);
-			}
 
-			parcel_num_markers = [];
-		}
 	  });
 	
 	// GeoMarker stuff
@@ -243,6 +224,13 @@ function initMap(my_lat_lon)
 	{
 		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
 	}
+}
+
+function goToZone(zone_num)
+{
+	if ( zone_num == null ) return;
+	
+	window.open("/zone.html?zone_num=" + zone_num);
 }
 
 /**
