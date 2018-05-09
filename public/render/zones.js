@@ -64,74 +64,6 @@ function initFeedback()
 	});
 }  
 
-/**
- * Called by Google Maps API after its loaded. Loads the Zones GeoJSON to draw the zones
- */
-function initPage()
-{
-	// Create the Map object
-	initMap(null);
-
-	// Load the Zone GeoJSON
-	$.getJSON("https://apachecounty.org/zones/zones.json", function (data) 
-	{
-		var zones = map.data.addGeoJson(data);
-
-		for ( var i = 0; i < zones.length; i++ ) 
-		{
-			labelFeature(zones[i], true);
-		}
-	});
-
-	$('#search-by-parcel-number-button').click(function(event) {
-
-        // Stop the Search input reloading the page by preventing its default action
-		event.preventDefault();
-		
-		onSearchByParcelNo();
-	});
-
-	/**
-	 * Handler for Search By Parcel Number box. Loops through collection of all features and
-	 * checks if the value in the box matches with any Parcel Numbers (exact match).
-	 */
-	function onSearchByParcelNo()
-	{
-		return; // Disable this on the zones page for now
-		var parcel_num = document.getElementById("search-by-parcel-number").value;
-		if ( parcel_num == null || parcel_num.length <= 0 ) return;
-
-		for ( var i = 0; i < all_features.length; i++ ) 
-		{
-			var feature = all_features[i];
-
-			// Sanitize the input value
-			var sanitized_input = parcel_num.replace('-', '');
-			while ( sanitized_input.indexOf('-') >= 0 )
-			{
-				sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
-			}
-			sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
-
-			// Sanitize the current parcel's parcel number
-			var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
-			sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', '');
-			while ( sanitized_feature_parcel_num.indexOf('-') >= 0 )
-			{
-				sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', ''); // Search ignores hyphens
-			}
-			sanitized_feature_parcel_num = sanitized_feature_parcel_num.toUpperCase(); // Search ignores case
-			
-			// Compare
-			if ( sanitized_input == sanitized_feature_parcel_num )
-			{
-				showFeature(feature);
-
-				return;
-			}
-		}
-	}
-}
 
 /**
  * Create the map object and set up the listeners
@@ -224,13 +156,6 @@ function initMap(my_lat_lon)
 	{
 		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
 	}
-}
-
-function goToZone(zone_num)
-{
-	if ( zone_num == null ) return;
-
-	window.open("/zone.html?zone_num=" + zone_num);
 }
 
 /**

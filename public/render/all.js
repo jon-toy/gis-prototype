@@ -72,85 +72,15 @@ function initFeedback()
  */
 function initPage()
 {
-	var zone_num = getUrlParam("zone_num");
-
-	var uri = "/get-maps";
-	if ( zone_num ) uri += "?zone_num=" + zone_num;
-
-	// Get GeoJSON list
-	$.get(uri, function(data, status)
+	var path = window.location.pathname;
+	if ( path.indexOf("zone_select.html") >= 0 )
 	{
-		geo_json_urls = [];
-		var api_host = data.host;
-		for ( var i = 0; i < data.body.books.length; i++ ) 
-		{
-			geo_json_urls.push(data.host + "/books/" + data.body.books[i]);
-		}
-
-		// Create the Map object
-		var starting_lat_lon = null;
-		if ( data.body.starting_lat && data.body.starting_lon ) starting_lat_lon = new google.maps.LatLng(data.body.starting_lat, data.body.starting_lon);
-	
-		initMap(starting_lat_lon, data.body.starting_zoom);
-
-		// Load sheriff specific GeoJSONs
-		initSheriff(api_host);
-		
-		var load_completed = [];
-		// Load the GeoJSONs
-		for ( var i = 0; i < geo_json_urls.length; i++ )
-		{
-			$.getJSON(geo_json_urls[i], function (data) 
-			{
-				var selected_feature = null;
-				try
-				{
-					var features = map.data.addGeoJson(data);
-					if ( getUrlParam('parcel') != null ) 
-					{
-						$.each( features, function( index, feature ) {
-							if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
-								{
-									showFeature(feature);
-									selected_feature = feature;
-								}
-							});
-					}
-					all_features = all_features.concat(features);
-					
-					if ( selected_feature != null ) 
-					{
-						selectFeature(selected_feature);
-					}
-				}
-				catch(err)
-				{
-					console.log(err);
-				}
-
-				load_completed.push(true);
-
-				if ( load_completed.length == geo_json_urls.length ) 
-				{
-					$(".loading").fadeOut(1500);
-					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
-					{
-						// Don't fade the logo in on mobile
-					}
-					else
-					{
-						$("#logo-container").fadeIn(1500);
-					}
-
-					console.log("Total Parcels: " + all_features.length);
-				}
-				else
-				{
-					document.getElementById("loading-message-status").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
-				}
-			});
-		}	
-	});
+		initZones(); // Load the zone select on the map
+	}
+	else
+	{
+		initParcels();
+	}
 
 	$('#search-by-parcel-number-button').click(function(event) {
 
@@ -201,29 +131,249 @@ function initPage()
 	}
 }
 
-function initSheriff(api_host)
+/**
+ * Load a map displaying the zones. Click on a zone to call initParcels(zone) and load only the
+ * parcels in that zone
+ */
+function initZones()
 {
-	var buffer = new google.maps.Data();
+	loadingFadeIn();
 
-	$.getJSON(api_host + "/sheriff/con.json", function (data) 
+	var starting_pos = new google.maps.LatLng(34.600, -109.450); // Starting position
+
+	// Create the Map object
+	initMap(starting_pos, 9, function()
 	{
-		cons = buffer.addGeoJson(data);
+		// Highlight the parcels
+		map.data.addListener('mouseover', function(event) {
+			var color = '#28a745';
+			map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
+			displayCoordinates(event.latLng);
+		});
+
+		map.data.addListener('mouseout', function(event) {
+			map.data.revertStyle();
+		});
+		
+
+		// Show modal on click
+		map.data.addListener('click', function(event) 
+		{			
+			loadingFadeIn();
+			var zone = event.feature.getProperty("ZONE");
+			initParcels(zone);
+		});
+
+		// Set colors
+		map.data.setStyle(function(feature) {
+			var color = '#007bff';
+			return /** @type {google.maps.Data.StyleOptions} */({
+			fillColor: color,
+			strokeColor: color,
+			strokeWeight: 3
+			});
+		});
+
+		// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
+		google.maps.event.addListener(map, 'mousemove', function (event) {
+			displayCoordinates(event.latLng);               
+		});
+
+		map.addListener('zoom_changed', function() {
+
+		});
+
+		initGeoCode();
 	});
 
-	$.getJSON(api_host + "/sheriff/fire.json", function (data) 
+	// Load the Zone GeoJSON
+	$.getJSON("https://apachecounty.org/zones/zones.json", function (data) 
 	{
-		fires = buffer.addGeoJson(data);
+		var zones = map.data.addGeoJson(data);
+
+		for ( var i = 0; i < zones.length; i++ ) 
+		{
+			labelFeature(zones[i].getProperty('ZONE_NAME'), zones[i], true);
+		}
+
+		loadingFadeOut();
 	});
 }
 
 /**
- * Create the map object and set up the listeners
- * @param {*} starting_lat_lon 
+ * Load a map displaying the parcels. Click on a parcel to display info. If a zone number is provided,
+ * load only the parcels in that zone. If not, load ALL the parcels
+ * @param {*} zone_num 
  */
-function initMap(starting_lat_lon, starting_zoom) 
+function initParcels(zone_num)
+{
+	loadingFadeIn();
+
+	var uri = "/get-maps";
+	if ( zone_num ) uri += "?zone_num=" + zone_num;
+
+	// Get GeoJSON list
+	$.get(uri, function(data, status)
+	{
+		geo_json_urls = [];
+		var api_host = data.host;
+		for ( var i = 0; i < data.body.books.length; i++ ) 
+		{
+			geo_json_urls.push(data.host + "/books/" + data.body.books[i]);
+		}
+
+		// Create the Map object
+		var starting_lat_lon = null;
+		if ( data.body.starting_lat && data.body.starting_lon ) starting_lat_lon = new google.maps.LatLng(data.body.starting_lat, data.body.starting_lon);
+	
+		initMap(starting_lat_lon, data.body.starting_zoom, function()
+		{
+			// Highlight the parcels
+			map.data.addListener('mouseover', function(event) {
+				var color = '#28a745';
+				map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
+				displayCoordinates(event.latLng);
+				displayParcel(event.feature);
+
+				current_parcel_marker = labelFeature(event.feature.getProperty('PARCEL_NUM'), event.feature, true);
+			});
+
+			map.data.addListener('mouseout', function(event) {
+				map.data.revertStyle();
+
+				if ( current_parcel_marker != null )
+				{
+					current_parcel_marker.setMap(null);
+				}
+			});
+			
+
+			// Show modal on click
+			map.data.addListener('click', function(event) 
+			{			
+				showFeature(event.feature);
+			});
+
+			// Set colors
+			map.data.setStyle(function(feature) {
+				var color = '#007bff';
+				return /** @type {google.maps.Data.StyleOptions} */({
+				fillColor: color,
+				strokeColor: color,
+				strokeWeight: 3
+				});
+			});
+
+			// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
+			google.maps.event.addListener(map, 'mousemove', function (event) {
+			displayCoordinates(event.latLng);               
+			});
+
+
+			// Wipe out the labels after we zoom out enough so it doesn't clutter the map
+			map.addListener('zoom_changed', function() {
+				if ( map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD )
+				{
+					// Wipe markers
+					for ( var i = 0; i < parcel_num_markers.length; i++ )
+					{
+						parcel_num_markers[i].setMap(null);
+					}
+
+					parcel_num_markers = [];
+				}
+			});
+		});
+
+		// Load sheriff specific GeoJSONs
+		initSheriff(api_host);
+		
+		var load_completed = [];
+		// Load the GeoJSONs
+		for ( var i = 0; i < geo_json_urls.length; i++ )
+		{
+			$.getJSON(geo_json_urls[i], function (data) 
+			{
+				var selected_feature = null;
+				try
+				{
+					var features = map.data.addGeoJson(data);
+					if ( getUrlParam('parcel') != null ) 
+					{
+						$.each( features, function( index, feature ) {
+							if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
+								{
+									showFeature(feature);
+									selected_feature = feature;
+								}
+							});
+					}
+					all_features = all_features.concat(features);
+					
+					if ( selected_feature != null ) 
+					{
+						selectFeature(selected_feature);
+					}
+				}
+				catch(err)
+				{
+					console.log(err);
+				}
+
+				load_completed.push(true);
+
+				if ( load_completed.length == geo_json_urls.length ) 
+				{
+					loadingFadeOut();
+					console.log("Total Parcels: " + all_features.length);
+				}
+				else
+				{
+					document.getElementById("loading-message-status").innerHTML = "Loading Parcel Data (" + load_completed.length + " of " + geo_json_urls.length + ")..."
+				}
+			});
+		}	
+	});
+
+	/**
+	 * Display the Parcel Number on the bottom bar
+	 * @param {*} feature 
+	 */
+	function displayParcel(feature) 
+	{
+		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
+	}
+
+	/**
+	 * Grab cons and fire GeoJSONs to load them specially into memory
+	 * @param {} api_host 
+	 */
+	function initSheriff(api_host)
+	{
+		var buffer = new google.maps.Data();
+
+		$.getJSON(api_host + "/sheriff/con.json", function (data) 
+		{
+			cons = buffer.addGeoJson(data);
+		});
+
+		$.getJSON(api_host + "/sheriff/fire.json", function (data) 
+		{
+			fires = buffer.addGeoJson(data);
+		});
+	}
+}
+
+/**
+ * Create the Map object. Takes in a lat/lon, a zoom level, and a function that executes
+ * based on the map. Examples of a mapSetup object are a function that changes the map's "on_zoom" listeners
+ * @param {*} starting_lat_lon 
+ * @param {*} starting_zoom 
+ * @param {*} mapSetup 
+ */
+function initMap(starting_lat_lon, starting_zoom, mapSetup) 
 {
 	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746); // Starting position
-	;
 
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
 
@@ -233,62 +383,14 @@ function initMap(starting_lat_lon, starting_zoom)
 	  fullscreenControl: false
 	});
 
-	// Highlight the parcels
-	map.data.addListener('mouseover', function(event) {
-		var color = '#28a745';
-		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
-		displayCoordinates(event.latLng);
-		displayParcel(event.feature);
+	if ( mapSetup ) mapSetup(); // Execute listener
+}
 
-		current_parcel_marker = labelFeature(event.feature, true);
-	  });
-
-	map.data.addListener('mouseout', function(event) {
-		map.data.revertStyle();
-
-		if ( current_parcel_marker != null )
-		{
-			current_parcel_marker.setMap(null);
-		}
-	});
-	
-
-	// Show modal on click
-	map.data.addListener('click', function(event) 
-	{			
-		showFeature(event.feature);
-	});
-
-	// Set colors
-	map.data.setStyle(function(feature) {
-		var color = '#007bff';
-		return /** @type {google.maps.Data.StyleOptions} */({
-		  fillColor: color,
-		  strokeColor: color,
-		  strokeWeight: 3
-		});
-	  });
-
-	// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
-	google.maps.event.addListener(map, 'mousemove', function (event) {
-	  displayCoordinates(event.latLng);               
-	});
-
-
-	// Wipe out the labels after we zoom out enough so it doesn't clutter the map
-	map.addListener('zoom_changed', function() {
-		if ( map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD )
-		{
-			// Wipe markers
-			for ( var i = 0; i < parcel_num_markers.length; i++ )
-			{
-				parcel_num_markers[i].setMap(null);
-			}
-
-			parcel_num_markers = [];
-		}
-	  });
-	
+/**
+ * Initialize the GeoLocation so the user can see where they are on the map
+ */
+function initGeoCode()
+{
 	// GeoMarker stuff
 	locate();
 	function locate()
@@ -306,28 +408,56 @@ function initMap(starting_lat_lon, starting_zoom)
 				icon: "/geolocation-icon.png"
 			});
 	}
+}
 
-	/**
-	 * Display the Lat/Lon on the bottom bar
-	 * @param {*} pnt 
-	 */
-	function displayCoordinates(pnt) 
+/**
+ * Turn on the loading screen
+ */
+function loadingFadeOut()
+{
+	$(".loading").fadeOut(1500);
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
 	{
-		var lat = pnt.lat();
-		lat = lat.toFixed(4);
-		var lng = pnt.lng();
-		lng = lng.toFixed(4);
-		document.getElementById("latlon-display").innerHTML = lat + ", " + lng;
+		// Don't fade the logo in on mobile
+	}
+	else
+	{
+		$("#logo-container").fadeIn(1500);
 	}
 
-	/**
-	 * Display the Parcel Number on the bottom bar
-	 * @param {*} feature 
-	 */
-	function displayParcel(feature) 
+	document.getElementById("loading-message-status").innerHTML = "";
+}
+
+/**
+ * Turn off the loading screen
+ */
+function loadingFadeIn()
+{
+	document.getElementById("loading-message-status").innerHTML = "";
+	
+	$(".loading").fadeIn(1500);
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
 	{
-		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
+		// Don't fade the logo in on mobile
 	}
+	else
+	{
+		$("#logo-container").fadeOut(1500);
+	}
+}
+
+
+/**
+ * Display the Lat/Lon on the bottom bar
+ * @param {*} pnt 
+ */
+function displayCoordinates(pnt) 
+{
+	var lat = pnt.lat();
+	lat = lat.toFixed(4);
+	var lng = pnt.lng();
+	lng = lng.toFixed(4);
+	document.getElementById("latlon-display").innerHTML = lat + ", " + lng;
 }
 
 /**
@@ -446,9 +576,9 @@ function showFeature(feature)
  * Draw a label on the map. The contents of the label are the feature's PARCEL_NUM property
  * @param {*} feature 
  */
-function labelFeature(feature, ignore_zoom_restriction)
+function labelFeature(label_text, feature, ignore_zoom_restriction)
 {
-	if ( ignore_zoom_restriction != true && map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD ) return; // Don't show labels when zoomed out so much
+	if ( ignore_zoom_restriction != true && map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD || label_text == null ) return; // Don't show labels when zoomed out so much
 	// Place a marker on there
 	var geom = feature.getGeometry();
 	var poly = new google.maps.Polygon({
@@ -460,7 +590,7 @@ function labelFeature(feature, ignore_zoom_restriction)
 	var marker = new google.maps.Marker({
 	  position: center,
 	  map: map,
-	  label: feature.getProperty('PARCEL_NUM'),
+	  label: label_text,
 	  icon: "blank.png"
 	});
 
@@ -478,7 +608,7 @@ function selectFeature(selected_feature)
 	// Style and color the selected feature
 	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
 
-	labelFeature(selected_feature);
+	labelFeature(selected_feature.getProperty('PARCEL_NUM'), selected_feature);
 
 	var geom = selected_feature.getGeometry();
 	var poly = new google.maps.Polygon({
@@ -568,10 +698,20 @@ function goToLatLon()
 	});
 }
 
-function jumpToUserLatLon()
+/**
+ * Go to user's current lat lon
+ */
+function goToUserLatLon()
 {
 	if ( user_lat_lon == null ) return;
 
 	map.panTo(user_lat_lon);
 	map.setZoom(18);
+}
+
+function goToZone(zone_num)
+{
+	if ( zone_num == 'select') return initZones();
+
+	return initParcels(zone_num);
 }

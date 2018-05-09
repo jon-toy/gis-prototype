@@ -76,11 +76,28 @@
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Jump To...
+              Move To...
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="#" data-toggle="modal" data-target="#latLonModal">Lat/Lon</a>
-              <a class="dropdown-item" href="javascript:jumpToUserLatLon();">My Location</a>
+              <a class="dropdown-item" href="javascript:goToUserLatLon();">My Location</a>
+              <!--<div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a>-->
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Zones
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="javascript:goToZone('select');">Select Zone</a>
+              <a class="dropdown-item" href="javascript:goToZone(1);">Sanders</a>
+              <a class="dropdown-item" href="javascript:goToZone(2);">Sanders South</a>
+              <a class="dropdown-item" href="javascript:goToZone(3);">St John's North</a>
+              <a class="dropdown-item" href="javascript:goToZone(4);">Concho</a>
+              <a class="dropdown-item" href="javascript:goToZone(5);">St John's</a>
+              <a class="dropdown-item" href="javascript:goToZone(6);">Vernon</a>
+              <a class="dropdown-item" href="javascript:goToZone(7);">Springerville/Eagar</a>
               <!--<div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#">Something else here</a>-->
             </div>

@@ -27,7 +27,7 @@
 </head>
 <body class="bg-light">
   <!-- Loading Pane -->
- <!-- <div class="loading">
+  <div class="loading">
     <div id="loading-inner" class="text-center">
       <a href="http://www.co.apache.az.us/" target="_blank"><img src="/logo.png" height="100" width="100" class="d-inline-block align-top" alt=""></a>
       <br>
@@ -52,7 +52,7 @@
             </small>
       </small>
     </div>
-  </div> -->
+  </div>
   <!-- Logo -->
   <div id="logo-container">
     <a href="http://www.co.apache.az.us/" target="_blank"><img src="/logo.png" height="100" width="100" class="d-inline-block align-top" alt=""></a>
@@ -80,7 +80,25 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="#" data-toggle="modal" data-target="#latLonModal">Lat/Lon</a>
-              <a class="dropdown-item" href="javascript:jumpToUserLatLon();">My Location</a>
+              <a class="dropdown-item" href="javascript:goToUserLatLon();">My Location</a>
+              <!--<div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a>-->
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Zones
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="javascript:goToZone('select');">Select Zone</a>
+              <a class="dropdown-item" href="javascript:goToZone(1);">Sanders</a>
+              <a class="dropdown-item" href="javascript:goToZone(2);">Sanders South</a>
+              <a class="dropdown-item" href="javascript:goToZone(3);">St John's North</a>
+              <a class="dropdown-item" href="javascript:goToZone(4);">Concho</a>
+              <a class="dropdown-item" href="javascript:goToZone(5);">St John's</a>
+              <a class="dropdown-item" href="javascript:goToZone(6);">Vernon</a>
+              <a class="dropdown-item" href="javascript:goToZone(7);">Springerville/Eagar</a>
+              <a class="dropdown-item" href="javascript:goToZone();">Select All</a>
               <!--<div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#">Something else here</a>-->
             </div>
@@ -103,8 +121,8 @@
   </nav>
 
   <!-- Map -->
-	<div id="zone-map-container" class="py-2 h-100 d-flex flex-column bg-light text-dark">
-      <div id="zone-map"></div>
+	<div class="py-2 h-100 d-flex flex-column bg-light text-dark">
+      <div id="map"></div>
       <footer class="footer d-flex mt-auto p-2 align-items-center justify-content-center">
        <span><small>Copyright © Apache County Arizona</small></span><span id="parcel-num-display">&nbsp;</span><span id="latlon-display">&nbsp;</span>
       </footer>
@@ -163,6 +181,28 @@
         </div>
       </div>
     </div>
+  
+  <!-- Lat Lon Modal -->
+	<div class="modal fade" id="latLonModal" tabindex="-1" role="dialog" aria-labelledby="latLonModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="latLonModalLabel">Jump to Lat Lon</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true"><i class="fa fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row p-2"><div class="col-3"><b>Latitude</b></div><div class="col-9"><input type="number" id="lat" value="33.8301"></div></div>
+            <div class="row p-2"><div class="col-3"><b>Longitude</b></div><div class="col-9"><input type="number" id="lon" value="-109.1263"></div></div>
+            <div class="row p-2"><div class="col-3"><b>View Parcel</b></div><div class="col-9"><input type="checkbox" id="view-parcel-for-lat-lon"></div></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="goToLatLon();">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   <!-- Feedback Modal -->
 	<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
@@ -211,7 +251,7 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
   
   <!-- Main JS -->
-  <script src="/render/zones.js"></script>
+  <script src="/render/all.js"></script>
   
   <!-- Google Maps -->
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initPage"
