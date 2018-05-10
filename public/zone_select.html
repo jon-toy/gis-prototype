@@ -22,12 +22,15 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
   
   <!-- Fontawesome -->
-  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"> 
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous">
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
+
   <!-- Loading Pane -->
-  <div class="loading">
+  <div class="loading" style="display: none;">
     <div id="loading-inner" class="text-center">
       <a href="http://www.co.apache.az.us/" target="_blank"><img src="/logo.png" height="100" width="100" class="d-inline-block align-top" alt=""></a>
       <br>
@@ -53,12 +56,13 @@
       </small>
     </div>
   </div>
+
   <!-- Logo -->
   <div id="logo-container">
     <a href="http://www.co.apache.az.us/" target="_blank"><img src="/logo.png" height="100" width="100" class="d-inline-block align-top" alt=""></a>
   </div>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="/zone_select.html">
       Apache County Parcel Viewer
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,8 +124,56 @@
     </div>
   </nav>
 
-  <!-- Map -->
 	<div class="py-2 h-100 d-flex flex-column bg-light text-dark">
+      <!-- Select Mode Pane -->
+      <div id="select-mode-inner" class="p-5 select-mode text-center">
+        <a href="http://www.co.apache.az.us/" target="_blank"><img src="/logo.png" height="100" width="100" class="d-inline-block align-top" alt=""></a>
+        <br>
+        <br>
+        <span class="text-dark">Apache County contains over 56,000 parcels. Choose your loading method.</span>
+        <br>
+        <br>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-body">
+                <h1 class="card-title"><i class="fa fa-map-marker-alt"></i></h1>
+                <h3 class="card-title">Load One Zone</h3>
+                <p class="card-text">Select and load parcels from a specific zone. (Recommended)</p>
+                <a href="javascript:selectMode(0);" class="btn btn-primary">Go</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-body">
+                <h1 class="card-title"><i class="fa fa-map-marker"></i></h1>
+                <h3 class="card-title">Load All Zones</h3>
+                <p class="card-text">Load ALL parcels. High bandwidth and data cap required.</p>
+                <a href="javascript:selectMode(1);" class="btn btn-primary">Go</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div class="row text-center">
+          <div class="col-sm-12">
+            <small>
+                <small>
+                    For an optimal viewing experience, please use a modern browser such as <br> 
+                    <a href="https://www.google.com/chrome/" target="_blank">Google Chrome</a>, 
+                    <a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">Mozilla Firefox</a>, 
+                    <a href="https://support.apple.com/downloads/safari" target="_blank">Safari</a>, or 
+                    <a href="https://www.microsoft.com/en-us/windows/microsoft-edge" target="_blank">Microsoft Edge.</a>
+                  </small>
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map -->
       <div id="map"></div>
       <footer class="footer d-flex mt-auto p-2 align-items-center justify-content-center">
        <span><small>Copyright © Apache County Arizona</small></span><span id="parcel-num-display">&nbsp;</span><span id="latlon-display">&nbsp;</span>
@@ -254,7 +306,7 @@
   <script src="/render/all.js"></script>
   
   <!-- Google Maps -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initPage"
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initModeSelect"
   async defer></script>
 
   <!-- Recaptcha -->

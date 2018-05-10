@@ -28,6 +28,17 @@ function getUrlParam(name)
 }
 
 /**
+ * 
+ */
+function selectMode(mode)
+{
+	$("#select-mode-inner").hide();
+
+	if ( mode == 0 ) return initZones();
+	if ( mode == 1 ) return initParcels();
+}
+
+/**
  * Set up the reCaptcha listeners
  */
 function initFeedback()
@@ -132,12 +143,25 @@ function initPage()
 }
 
 /**
+ * After Maps API is loaded, await user input
+ */
+function initModeSelect()
+{
+	/*var starting_lat_lon = new google.maps.LatLng(34.600, -109.450); // Starting position
+	map = new google.maps.Map(document.getElementById('map'), {
+		center: starting_lat_lon,
+		zoom: 9,
+		fullscreenControl: false
+	  });*/
+}
+
+/**
  * Load a map displaying the zones. Click on a zone to call initParcels(zone) and load only the
  * parcels in that zone
  */
 function initZones()
 {
-	loadingFadeIn();
+	loadingFadeIn(100);
 
 	var starting_pos = new google.maps.LatLng(34.600, -109.450); // Starting position
 
@@ -413,16 +437,17 @@ function initGeoCode()
 /**
  * Turn on the loading screen
  */
-function loadingFadeOut()
+function loadingFadeOut(speed)
 {
-	$(".loading").fadeOut(1500);
+	if ( speed == null ) speed = 1500;
+	$(".loading").fadeOut(speed);
 	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
 	{
 		// Don't fade the logo in on mobile
 	}
 	else
 	{
-		$("#logo-container").fadeIn(1500);
+		$("#logo-container").fadeIn(speed);
 	}
 
 	document.getElementById("loading-message-status").innerHTML = "";
@@ -431,18 +456,19 @@ function loadingFadeOut()
 /**
  * Turn off the loading screen
  */
-function loadingFadeIn()
+function loadingFadeIn(speed)
 {
 	document.getElementById("loading-message-status").innerHTML = "";
-	
-	$(".loading").fadeIn(1500);
+
+	if ( speed == null ) speed = 1500;
+	$(".loading").fadeIn(speed);
 	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
 	{
 		// Don't fade the logo in on mobile
 	}
 	else
 	{
-		$("#logo-container").fadeOut(1500);
+		$("#logo-container").fadeOut(speed);
 	}
 }
 

@@ -112,3 +112,13 @@ html, body {
   #loading-inner {
       z-index: 1000;
   }
+
+  .select-mode
+  {
+      
+  }
+
+  #select-mode-inner
+  {
+      height:100%;
+  }
