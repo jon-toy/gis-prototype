@@ -18,6 +18,10 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 })
 
+app.get('/zone_select.html', function (req, res) {
+  res.sendFile(__dirname + '/public/index.html');
+})
+
 app.use(express.static(__dirname + '/public'));
 
 app.get('/get-maps', function(req, res) {
