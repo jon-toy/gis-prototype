@@ -9,10 +9,124 @@ var cons = [];
 var fires = [];
 var user_lat_lon = null;
 var current_parcel_marker = null;
+var current_zone = null;
 
 $(document).ready(function() {
 	initFeedback();
+	initParcelParam();
+
+	$('#search-by-parcel-number-button').click(function(event) {
+
+        // Stop the Search input reloading the page by preventing its default action
+		event.preventDefault();
+		
+		searchByParcelNumLoadZone();
+	});
   });
+
+function initParcelParam()
+{
+	// Get the parcel
+	var parcel_num_param = getUrlParam("parcel");
+	if ( parcel_num_param == null ) return;
+
+	$("#select-mode-inner").hide();
+	searchByParcelNumLoadZone(parcel_num_param)
+}
+
+/**
+ * Search for a parcel, given a parcel. If the parcel is outside the currently loaded zone, load it
+ * @param {} parcel_num 
+ */
+function searchByParcelNumLoadZone(parcel_num)
+{
+	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
+
+	var uri = "https://apachecounty.org/parcels/" + parcel_num;
+	$.getJSON(uri, function (data) 
+	{
+		if ( data.error_message )
+		{
+			console.log(data.error_message);
+			$("#select-mode-inner").show();
+			return;
+		}
+
+		var buffer = new google.maps.Data();
+		var features = buffer.addGeoJson(data);
+		feature = features[0]; // Should only load one;
+
+		// Get the center point
+		var parcel_geom = feature.getGeometry();
+		var parcel_poly = new google.maps.Polygon({
+			paths: parcel_geom.getAt(0).getArray(),
+		});
+		var starting_lat_lon = getPolygonCenter(parcel_poly);
+
+		var book = feature.getProperty("PARCEL_NUM").substring(0, 3);
+		var zone_uri = "https://apachecounty.org/zone/" + book;
+		$.getJSON(zone_uri, function (data)
+		{
+			if ( data.error_message )
+			{
+				console.log(data.error_message);
+				return;
+			}
+
+			if ( current_zone == data.zone )
+			{
+				// No need to load the zone again, just pan to the parcel
+				getParcelFromMap(feature.getProperty("PARCEL_NUM"));
+				return;
+			}
+			
+			initParcels(data.zone, starting_lat_lon, function()
+			{
+				getParcelFromMap(feature.getProperty("PARCEL_NUM"));
+			});
+		});
+	});
+
+/**
+ * Get the feature/parcel from the map, given a parcel number
+ * @param {} parcel_num 
+ */
+function getParcelFromMap(parcel_num)
+{
+	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
+	if ( parcel_num == null || parcel_num.length <= 0 ) return;
+
+	for ( var i = 0; i < all_features.length; i++ ) 
+	{
+		var feature = all_features[i];
+
+		// Sanitize the input value
+		var sanitized_input = parcel_num.replace('-', '');
+		while ( sanitized_input.indexOf('-') >= 0 )
+		{
+			sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
+		}
+		sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
+
+		// Sanitize the current parcel's parcel number
+		var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
+		sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', '');
+		while ( sanitized_feature_parcel_num.indexOf('-') >= 0 )
+		{
+			sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', ''); // Search ignores hyphens
+		}
+		sanitized_feature_parcel_num = sanitized_feature_parcel_num.toUpperCase(); // Search ignores case
+		
+		// Compare
+		if ( sanitized_input == sanitized_feature_parcel_num )
+		{
+			showFeature(feature);
+			selectFeature(feature);
+			return;
+		}
+	}
+}
+}
 
 /**
  * Helper function to get URL Parameters
@@ -75,72 +189,6 @@ function initFeedback()
 	  return false;
 	});
 }  
-
-/**
- * Called by Google Maps API after its loaded. Makes a call out to the server to get a list
- * of the GeoJSONs, then calls out to the data API to grab the GeoJSONs individually and
- * load them asynchonously
- */
-function initPage()
-{
-	var path = window.location.pathname;
-	if ( path.indexOf("zone_select.html") >= 0 )
-	{
-		initZones(); // Load the zone select on the map
-	}
-	else
-	{
-		initParcels();
-	}
-
-	$('#search-by-parcel-number-button').click(function(event) {
-
-        // Stop the Search input reloading the page by preventing its default action
-		event.preventDefault();
-		
-		onSearchByParcelNo();
-	});
-
-	/**
-	 * Handler for Search By Parcel Number box. Loops through collection of all features and
-	 * checks if the value in the box matches with any Parcel Numbers (exact match).
-	 */
-	function onSearchByParcelNo()
-	{
-		var parcel_num = document.getElementById("search-by-parcel-number").value;
-		if ( parcel_num == null || parcel_num.length <= 0 ) return;
-
-		for ( var i = 0; i < all_features.length; i++ ) 
-		{
-			var feature = all_features[i];
-
-			// Sanitize the input value
-			var sanitized_input = parcel_num.replace('-', '');
-			while ( sanitized_input.indexOf('-') >= 0 )
-			{
-				sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
-			}
-			sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
-
-			// Sanitize the current parcel's parcel number
-			var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
-			sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', '');
-			while ( sanitized_feature_parcel_num.indexOf('-') >= 0 )
-			{
-				sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', ''); // Search ignores hyphens
-			}
-			sanitized_feature_parcel_num = sanitized_feature_parcel_num.toUpperCase(); // Search ignores case
-			
-			// Compare
-			if ( sanitized_input == sanitized_feature_parcel_num )
-			{
-				showFeature(feature);
-
-				return;
-			}
-		}
-	}
-}
 
 /**
  * After Maps API is loaded, await user input
@@ -229,7 +277,7 @@ function initZones()
  * load only the parcels in that zone. If not, load ALL the parcels
  * @param {*} zone_num 
  */
-function initParcels(zone_num)
+function initParcels(zone_num, starting_lat_lon, callback)
 {
 	loadingFadeIn();
 
@@ -247,10 +295,10 @@ function initParcels(zone_num)
 		}
 
 		// Create the Map object
-		var starting_lat_lon = null;
-		if ( data.body.starting_lat && data.body.starting_lon ) starting_lat_lon = new google.maps.LatLng(data.body.starting_lat, data.body.starting_lon);
-	
-		initMap(starting_lat_lon, data.body.starting_zoom, function()
+		if ( starting_lat_lon == null && data.body.starting_lat && data.body.starting_lon ) starting_lat_lon = new google.maps.LatLng(data.body.starting_lat, data.body.starting_lon);
+		var starting_zoom = data.body.starting_zoom;
+
+		initMap(starting_lat_lon, starting_zoom, function()
 		{
 			// Highlight the parcels
 			map.data.addListener('mouseover', function(event) {
@@ -349,6 +397,8 @@ function initParcels(zone_num)
 				if ( load_completed.length == geo_json_urls.length ) 
 				{
 					loadingFadeOut();
+					current_zone = zone_num;
+					if ( callback ) callback();
 					console.log("Total Parcels: " + all_features.length);
 				}
 				else
@@ -471,7 +521,6 @@ function loadingFadeIn(speed)
 		$("#logo-container").fadeOut(speed);
 	}
 }
-
 
 /**
  * Display the Lat/Lon on the bottom bar
