@@ -216,7 +216,7 @@ function initZones()
 	// Create the Map object
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: starting_pos,
-		zoom: 9,
+		zoom: 8.9,
 		fullscreenControl: false,
 		gestureHandling: 'none',
         zoomControl: false
@@ -823,5 +823,7 @@ function goToZone(zone_num)
 {
 	if ( zone_num == 'select') return initZones();
 
+	$("#select-mode-inner").hide();
+	$('#navbarSupportedContent').collapse('hide');
 	return initParcels(zone_num);
 }
