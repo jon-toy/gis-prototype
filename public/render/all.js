@@ -211,15 +211,13 @@ function initZones()
 {
 	loadingFadeIn(100);
 
-	var starting_pos = new google.maps.LatLng(34.600, -109.450); // Starting position
+	var starting_pos = new google.maps.LatLng(35.330, -109.450); // Starting position
 
 	// Create the Map object
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: starting_pos,
-		zoom: 8.9,
+		zoom: 8, //8.9,
 		fullscreenControl: false,
-		gestureHandling: 'none',
-        zoomControl: false
 	});
 
 	// Highlight the parcels
@@ -269,7 +267,7 @@ function initZones()
 
 		for ( var i = 0; i < zones.length; i++ ) 
 		{
-			if ( zones[i].getProperty('ZONE') == 1 )
+			/*if ( zones[i].getProperty('ZONE') == 1 )
 			{
 				var lat_lon = new google.maps.LatLng(35.18, -109.43913149999997);
 				labelFeature(zones[i].getProperty('ZONE_NAME'), zones[i], true, lat_lon);
@@ -279,7 +277,7 @@ function initZones()
 				var lat_lon = new google.maps.LatLng(34.02, -109.45805050000001);
 				labelFeature(zones[i].getProperty('ZONE_NAME'), zones[i], true, lat_lon);
 			}
-			else
+			else*/
 			{
 				labelFeature(zones[i].getProperty('ZONE_NAME'), zones[i], true);
 			}
