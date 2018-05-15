@@ -1,4 +1,4 @@
-const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 16; // Hide markers below this threshold
+const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 13; // Hide markers below this threshold
 
 var map, GeoMarker; // Google Maps API objects
 var geo_json_urls = []; // URLs for all the GeoJSON objects after listing the results from the server.
@@ -122,6 +122,9 @@ function getParcelFromMap(parcel_num)
 		{
 			showFeature(feature);
 			selectFeature(feature);
+			
+			// Zoom in
+			map.setZoom(15);
 			return;
 		}
 	}
@@ -366,6 +369,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		});
 
 		map.data.addListener('mouseout', function(event) {
+			console.log(event.feature.getProperty("PARCEL_NUM")); 
+
 			map.data.revertStyle();
 
 			if ( current_parcel_marker != null )
@@ -379,11 +384,20 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		map.data.addListener('click', function(event) 
 		{			
 			showFeature(event.feature);
+			
+			event.feature.setProperty('selected', true);
 		});
 
 		// Set colors
 		map.data.setStyle(function(feature) {
 			var color = '#007bff';
+
+			// Change the color of the feature permanently
+			if (feature.getProperty('selected')) 
+			{
+				color = '#20c997';
+			}
+
 			return /** @type {google.maps.Data.StyleOptions} */({
 			fillColor: color,
 			strokeColor: color,
@@ -393,7 +407,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 		// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
 		google.maps.event.addListener(map, 'mousemove', function (event) {
-		displayCoordinates(event.latLng);               
+			displayCoordinates(event.latLng);               
 		});
 
 
@@ -420,26 +434,10 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		{
 			$.getJSON(geo_json_urls[i], function (data) 
 			{
-				var selected_feature = null;
 				try
 				{
 					var features = map.data.addGeoJson(data);
-					if ( getUrlParam('parcel') != null ) 
-					{
-						$.each( features, function( index, feature ) {
-							if ( feature.getProperty('PARCEL_NUM') == getUrlParam('parcel') )
-								{
-									showFeature(feature);
-									selected_feature = feature;
-								}
-							});
-					}
 					all_features = all_features.concat(features);
-					
-					if ( selected_feature != null ) 
-					{
-						selectFeature(selected_feature);
-					}
 				}
 				catch(err)
 				{
@@ -724,6 +722,8 @@ function selectFeature(selected_feature)
 	});
 	var center = getPolygonCenter(poly);
 	map.panTo(center);
+
+	selected_feature.setProperty('selected', true);
 }
 
 /**
