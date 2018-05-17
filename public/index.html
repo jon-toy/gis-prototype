@@ -183,22 +183,46 @@
 	
 	<!-- Modals -->
 	<div class="modal fade" id="parcelModal" tabindex="-1" role="dialog" aria-labelledby="parcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="parcelModalLabel">Parcel Info: </h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fa fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+    <div id="parcel_content"></div>
+    </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-info" disabled>More Info</button>
+          <a href="#" id="button-link-assessor" target="_blank" class="btn btn-outline-secondary">Assessor</a>
+          <a href="#" id="button-link-treasurer" target="_blank" class="btn btn-outline-secondary">Treasurer</a>
+          <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm -->
+  <div class="modal fade" id="confirmZoneLoadModal" tabindex="-1" role="dialog" aria-labelledby="confirmZoneLoadModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="parcelModalLabel">Parcel Info: </h5>
+            <h5 class="modal-title" id="confirmZoneLoadModalLabel">Confirm Zone Load</h5>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true"><i class="fa fa-times"></i></span>
             </button>
           </div>
           <div class="modal-body">
-			<div id="parcel_content"></div>
-		  </div>
+            The parcel you are trying to view exists outside of your current zone. Click "Load Zone" to proceed.
+            <br><br>
+            <strong>Current Zone</strong>: <span id="confirmZoneModalCurrentZone"></span><br>
+            <strong>New Zone</strong>: <span id="confirmZoneModalNewZone"></span>
+          </div>
           <div class="modal-footer">
-            <button class="btn btn-outline-info" disabled>More Info</button>
-            <a href="#" id="button-link-assessor" target="_blank" class="btn btn-outline-secondary">Assessor</a>
-            <a href="#" id="button-link-treasurer" target="_blank" class="btn btn-outline-secondary">Treasurer</a>
-            <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
+            <button id="confirmZoneLoadModalButton" class="btn btn-primary" type="button" data-dismiss="modal">Load Zone</button>
+            <button class="btn btn-outline-secondary" type="button" data-dismiss="modal">Cancel</button>
           </div>
         </div>
       </div>

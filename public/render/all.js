@@ -32,18 +32,25 @@ function initParcelParam()
 	if ( parcel_num_param == null ) return;
 
 	$("#select-mode-inner").hide();
-	searchByParcelNumLoadZone(parcel_num_param)
+	searchByParcelNumLoadZone(parcel_num_param, true)
 }
 
 /**
  * Search for a parcel, given a parcel. If the parcel is outside the currently loaded zone, load it
  * @param {} parcel_num 
  */
-function searchByParcelNumLoadZone(parcel_num)
+function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 {
 	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
 
 	var uri = "https://apachecounty.org/parcels/" + parcel_num;
+
+	if ( parcel_num.startsWith("R") )
+	{
+		// This is an account number instead
+		uri = "https://apachecounty.org/accounts/" + parcel_num;
+	}
+
 	$.getJSON(uri, function (data) 
 	{
 		if ( data.error_message )
@@ -74,17 +81,34 @@ function searchByParcelNumLoadZone(parcel_num)
 				return;
 			}
 
-			if ( current_zone == data.zone )
+			if ( current_zone == 'all' || current_zone == data.zone )
 			{
 				// No need to load the zone again, just pan to the parcel
 				getParcelFromMap(feature.getProperty("PARCEL_NUM"));
 				return;
 			}
 			
-			initParcels(data.zone, starting_lat_lon, function()
+			if ( skip_confirm )
 			{
-				getParcelFromMap(feature.getProperty("PARCEL_NUM"));
-			});
+				$('#navbar-title').html(getZoneName(data.zone) + " Parcel Viewer");
+				initParcels(data.zone, starting_lat_lon, function()
+				{
+					getParcelFromMap(feature.getProperty("PARCEL_NUM"));
+				});
+			}
+			else
+			{
+				$('#confirmZoneLoadModal').modal('show');
+				$('#confirmZoneModalCurrentZone').html(getZoneName(current_zone));
+				$('#confirmZoneModalNewZone').html(getZoneName(data.zone));
+				$("#confirmZoneLoadModalButton").on('click', function()
+				{
+					initParcels(data.zone, starting_lat_lon, function()
+					{
+						getParcelFromMap(feature.getProperty("PARCEL_NUM"));
+					});
+				});
+			}
 		});
 	});
 
@@ -268,6 +292,8 @@ function initZones()
 	{
 		var zones = map.data.addGeoJson(data);
 
+		all_zones = []; // Load the fresh zones
+
 		for ( var i = 0; i < zones.length; i++ ) 
 		{
 			labelFeature(zones[i].getProperty('ZONE_NAME'), zones[i], true);
@@ -439,6 +465,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 				{
 					loadingFadeOut();
 					current_zone = zone_num;
+					if ( current_zone == null ) current_zone = 'all';
 					if ( callback ) callback();
 					console.log("Total Parcels: " + all_features.length);
 				}
@@ -819,9 +846,41 @@ function goToZone(zone_num)
 
 function getZoneName(zone_num)
 {
-	for ( var i = 0; i < all_zones.length; i++ )
+	if ( zone_num == null ) return "Apache County";
+
+	// Get the zones if we haven't already
+	if ( all_zones.length == 0 )
 	{
-		if ( all_zones[i].getProperty("ZONE") == zone_num ) return all_zones[i].getProperty("ZONE_NAME");
+		$.getJSON("https://apachecounty.org/zones/zones.json", function (data) 
+		{
+			var buffer = new google.maps.Data();
+			var zones = buffer.addGeoJson(data);
+
+			all_zones = []; // Load the fresh zones
+
+			// Suboptimal but we should only ever have like 10 zones anyway
+			for ( var i = 0; i < zones.length; i++ ) 
+			{
+				all_zones.push(zones[i]);
+			}
+
+			for ( var i = 0; i < all_zones.length; i++ )
+			{
+				if ( all_zones[i].getProperty("ZONE") == zone_num ) 
+				{
+					$('#navbar-title').html(getZoneName(zone_num) + " Parcel Viewer");
+
+					return; // Return nothing since we've already changed it. Workaround since this is done in a callback function
+				}
+			}
+		});
+	}
+	else
+	{
+		for ( var i = 0; i < all_zones.length; i++ )
+		{
+			if ( all_zones[i].getProperty("ZONE").toString() == zone_num.toString() ) return all_zones[i].getProperty("ZONE_NAME");
+		}
 	}
 
 	return "Apache County";
