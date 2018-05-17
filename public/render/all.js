@@ -868,7 +868,8 @@ function getZoneName(zone_num)
 			{
 				if ( all_zones[i].getProperty("ZONE") == zone_num ) 
 				{
-					$('#navbar-title').html(getZoneName(zone_num) + " Parcel Viewer");
+					$('#navbar-title').html(all_zones[i].getProperty("ZONE_NAME") + " Parcel Viewer");
+					$('#confirmZoneModalNewZone').html(all_zones[i].getProperty("ZONE_NAME"));
 
 					return; // Return nothing since we've already changed it. Workaround since this is done in a callback function
 				}
