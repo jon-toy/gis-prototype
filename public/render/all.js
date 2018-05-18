@@ -23,6 +23,9 @@ $(document).ready(function() {
 		
 		searchByParcelNumLoadZone();
 	});
+
+	mapsScaleMilesHack();
+	
   });
 
 function initParcelParam()
@@ -225,17 +228,6 @@ function initFeedback()
  */
 function initModeSelect()
 {
-	//START hack to set scale to miles/imperial instead of km/metric:
-    window.setTimeout(function() {
-		var spn = document.getElementById("map").getElementsByClassName("gm-style-cc");
-		for (var i in spn) {
-		  //look for km or m in innerText via regex https://regexr.com/3hiqa
-		  if ((/\d\s?(km|(m\b))/g).test(spn[i].innerText)) {
-			spn[i].click();
-		  }
-		}
-	  }, 1000);
-	  //END hack to set scale to miles/imperial instead of km/metric
 }
 
 /**
@@ -485,6 +477,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 				}
 			});
 		}	
+
+		mapsScaleMilesHack();
 	});
 
 	/**
@@ -514,6 +508,24 @@ function initParcels(zone_num, starting_lat_lon, callback)
 			fires = buffer.addGeoJson(data);
 		});
 	}
+}
+
+/**
+ * Hack to force a click to set the km to miles on the map
+ */
+function mapsScaleMilesHack()
+{
+	var scaleInterval = setInterval( function() {
+		var spn = document.getElementById('map').getElementsByTagName('span');
+		var pattern = /\d+\s+(m|km)/i;
+		for(var i in spn) {
+			if ( pattern.test(spn[i].innerHTML) ) {
+			spn[i].click();
+			clearInterval(scaleInterval);
+			}
+		}
+		}, 500);
+		setTimeout( function() { clearInterval(scaleInterval) }, 20000 );
 }
 
 /**
@@ -851,6 +863,7 @@ function goToZone(zone_num)
 	$('#navbarSupportedContent').collapse('hide');
 
 	$('#navbar-title').html(getZoneName(zone_num) + " Parcel Viewer");
+
 	return initParcels(zone_num);
 }
 
