@@ -225,7 +225,17 @@ function initFeedback()
  */
 function initModeSelect()
 {
-
+	//START hack to set scale to miles/imperial instead of km/metric:
+    window.setTimeout(function() {
+		var spn = document.getElementById("map").getElementsByClassName("gm-style-cc");
+		for (var i in spn) {
+		  //look for km or m in innerText via regex https://regexr.com/3hiqa
+		  if ((/\d\s?(km|(m\b))/g).test(spn[i].innerText)) {
+			spn[i].click();
+		  }
+		}
+	  }, 1000);
+	  //END hack to set scale to miles/imperial instead of km/metric
 }
 
 /**
