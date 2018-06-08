@@ -25,7 +25,7 @@ $(document).ready(function() {
 	});
 
 	mapsScaleMilesHack();
-	
+
   });
 
 function initParcelParam()
@@ -386,7 +386,6 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		});
 
 		map.data.addListener('mouseout', function(event) {
-			console.log(event.feature.getProperty("PARCEL_NUM")); 
 
 			map.data.revertStyle();
 
@@ -444,6 +443,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 		// Load sheriff specific GeoJSONs
 		initSheriff(api_host);
+
+		initSpecific(api_host);
 		
 		var load_completed = [];
 		// Load the GeoJSONs
@@ -634,6 +635,16 @@ function showFeature(feature)
 	renderProperty(info_box, "Owner", owner);
 	renderProperty(info_box, "Account Information", account_number);
 	renderProperty(info_box, "Size", size);
+
+	if ( account_number )
+	{
+		$.getJSON("https://apachecounty.org/treasurer/account-balance/" + account_number, function (data)
+		{
+			var with_decimal = data.balance_due.substring(0, data.balance_due.length - 2) + '.' + data.balance_due.substring(data.balance_due.length - 2, data.balance_due.length);
+
+			renderProperty(info_box, "Balance Due", "$" + with_decimal);
+		});
+	}
 
 	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
 	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
