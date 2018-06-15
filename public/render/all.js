@@ -628,23 +628,24 @@ function showFeature(feature)
 
 	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
 
-	renderProperty(info_box, "Situs", feature.getProperty('SITUS'));
-	renderProperty(info_box, "CON", getCon(feature));
-	renderProperty(info_box, "Fire District", getFireDistrict(feature));
-	if ( show_mid_bar == true ) renderProperty(info_box, "", "", "border-top my-3");
-	renderProperty(info_box, "Owner", owner);
-	renderProperty(info_box, "Account Information", account_number);
-	renderProperty(info_box, "Size", size);
+	renderModalProperty(info_box, "Situs", feature.getProperty('SITUS'));
+	renderModalProperty(info_box, "CON", getCon(feature));
+	renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
+	if ( show_mid_bar == true ) renderModalProperty(info_box, "", "", "border-top my-3");
+	renderModalProperty(info_box, "Owner", owner);
+	renderModalProperty(info_box, "Account Information", account_number);
+	renderModalProperty(info_box, "Size", size);
 
-	if ( account_number )
+	// Remove account balance
+	/*if ( account_number )
 	{
 		$.getJSON("https://apachecounty.org/treasurer/account-balance/" + account_number, function (data)
 		{
 			var with_decimal = data.balance_due.substring(0, data.balance_due.length - 2) + '.' + data.balance_due.substring(data.balance_due.length - 2, data.balance_due.length);
 
-			renderProperty(info_box, "Balance Due", "$" + with_decimal);
+			renderModalProperty(info_box, "Balance Due", "$" + with_decimal);
 		});
-	}
+	}*/
 
 	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
 	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
@@ -652,28 +653,6 @@ function showFeature(feature)
 	$("#parcelModal").modal("show");
 
 	selectFeature(feature);
-
-	function renderProperty(container, title, content, css_classes)
-	{
-		if ( content == null ) return;
-
-		var row = document.createElement('div');
-		row.className = "row p-2";
-
-		var title_container = document.createElement('div');
-		title_container.className = 'col-3';
-		title_container.innerHTML = '<b>' + title + '</b>';
-		row.appendChild(title_container);
-
-		var content_container = document.createElement('div');
-		content_container.className = 'col-9';
-		content_container.innerHTML = content;
-		row.appendChild(content_container);
-
-		if ( css_classes ) row.className = css_classes;
-
-		container.appendChild(row);
-	}
 
 	function getFireDistrict(parcel)
 	{
@@ -725,6 +704,28 @@ function showFeature(feature)
 		return ret;
 	}
 }
+
+function renderModalProperty(container, title, content, css_classes)
+	{
+		if ( content == null ) return;
+
+		var row = document.createElement('div');
+		row.className = "row p-2";
+
+		var title_container = document.createElement('div');
+		title_container.className = 'col-3';
+		title_container.innerHTML = '<b>' + title + '</b>';
+		row.appendChild(title_container);
+
+		var content_container = document.createElement('div');
+		content_container.className = 'col-9';
+		content_container.innerHTML = content;
+		row.appendChild(content_container);
+
+		if ( css_classes ) row.className = css_classes;
+
+		container.appendChild(row);
+	}
 
 /**
  * Draw a label on the map. The contents of the label are the feature's PARCEL_NUM property

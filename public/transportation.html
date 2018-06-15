@@ -181,7 +181,8 @@
       </footer>
 	</div>	
 	
-	<!-- Modals -->
+  <!-- Modals -->
+  <!-- Parcels -->
 	<div class="modal fade" id="parcelModal" tabindex="-1" role="dialog" aria-labelledby="parcelModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -198,6 +199,26 @@
           <button class="btn btn-outline-info" disabled>More Info</button>
           <a href="#" id="button-link-assessor" target="_blank" class="btn btn-outline-secondary">Assessor</a>
           <a href="#" id="button-link-treasurer" target="_blank" class="btn btn-outline-secondary">Treasurer</a>
+          <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+   <!-- Transportation-->
+   <div class="modal fade" id="transportationModal" tabindex="-1" role="dialog" aria-labelledby="transportationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="transportationModalLabel">Road Info: </h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fa fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+    <div id="transportation_content"></div>
+    </div>
+        <div class="modal-footer">
           <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
         </div>
       </div>
