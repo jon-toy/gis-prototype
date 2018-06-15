@@ -415,10 +415,10 @@ function initParcels(zone_num, starting_lat_lon, callback)
 			}
 
 			return /** @type {google.maps.Data.StyleOptions} */({
-			fillColor: color,
-			strokeColor: color,
-			strokeWeight: 3
-			});
+				fillColor: color,
+				strokeColor: color,
+				strokeWeight: 1
+				});
 		});
 
 		// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
