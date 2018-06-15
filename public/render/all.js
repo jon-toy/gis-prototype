@@ -483,15 +483,6 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	});
 
 	/**
-	 * Display the Parcel Number on the bottom bar
-	 * @param {*} feature 
-	 */
-	function displayParcel(feature) 
-	{
-		document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
-	}
-
-	/**
 	 * Grab cons and fire GeoJSONs to load them specially into memory
 	 * @param {} api_host 
 	 */
@@ -509,6 +500,15 @@ function initParcels(zone_num, starting_lat_lon, callback)
 			fires = buffer.addGeoJson(data);
 		});
 	}
+}
+
+/**
+ * Display the Parcel Number on the bottom bar
+ * @param {*} feature 
+ */
+function displayParcel(feature) 
+{
+	document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
 }
 
 /**

@@ -6,13 +6,17 @@ var transportations = [];
  */
 function initSpecific(api_host)
 {
+    loadingFadeIn();
+
     $.getJSON(api_host + "/transportation/transportation.json", function (data) 
     {
-        var starting_lat_lon = new google.maps.LatLng(34.1259, -109.2801);
+        var starting_lat_lon = new google.maps.LatLng(34.1259, -109.2801); 
 
         transportations = map.data.addGeoJson(data);
         console.log("Added transportation data");
         console.log(transportations);
+
+        loadingFadeOut();
 
         // Set colors
 		map.data.setStyle(function(feature) {
@@ -22,7 +26,7 @@ function initSpecific(api_host)
                 return ({
                     strokeColor: "#FF0000",
                     strokeOpacity: 0.8,
-                    strokeWeight: 5,
+                    strokeWeight: 7,
                 });
             }
 
@@ -44,6 +48,7 @@ function initSpecific(api_host)
 
         // Remove all listeners
         google.maps.event.clearListeners(map.data, 'click');
+        google.maps.event.clearListeners(map.data, 'mouseover');
         
         // Show modal on click
 		map.data.addListener('click', function(event) 
