@@ -345,10 +345,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	var api_host = "https://apachecounty.org";
 
 	// Create the Map object
-	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(34.1259, -109.2801);
 	var starting_zoom = 14;
 
-	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.83199129270437, -109.120958336746); // Starting position
+	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.9513, -109.2292); // Starting position
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
 
 	map = new google.maps.Map(document.getElementById('map'), {
