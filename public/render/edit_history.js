@@ -232,7 +232,7 @@ function initZones()
 {
 	loadingFadeIn(100);
 
-	var starting_pos = new google.maps.LatLng(35.330, -109.450); // Starting position
+	var starting_pos = new google.maps.LatLng(33.9547, -109.2256); // Starting position
 
 	// Create the Map object
 	map = new google.maps.Map(document.getElementById('map'), {
