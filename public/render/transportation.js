@@ -28,7 +28,17 @@ function initSpecific(api_host)
                     strokeOpacity: 0.8,
                     strokeWeight: 7,
                 });
-            }
+			}
+			
+			// Markers
+			if ( markers.indexOf(feature) >= 0 )
+			{
+				return ({
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 7,
+                });
+			}
 
             // Parcels
 			var color = '#007bff';
@@ -73,7 +83,11 @@ function initSpecific(api_host)
             if ( transportations.indexOf(event.feature) >= 0 )
             {
                 displayTransportation(event.feature);
-            }
+			}
+			else if ( transportations.indexOf(event.feature) >= 0 )
+            {
+                displayMarker(event.feature);
+			}
             else
             {
                 displayParcel(event.feature);

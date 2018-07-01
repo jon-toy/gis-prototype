@@ -12,6 +12,8 @@ var all_features = []; // Unreliable on page load. Used for calls to action afte
 var parcel_num_markers = []; // Store references to all markers currently on the page so we can manipulate en masse
 var cons = [];
 var fires = [];
+var markers = [];
+var text = [];
 var user_lat_lon = null;
 var current_parcel_marker = null;
 var current_zone = null;
@@ -342,6 +344,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 {
 	loadingFadeIn();
 
+	//var api_host = "http://localhost:3001";
 	var api_host = "https://apachecounty.org";
 
 	// Create the Map object
@@ -427,6 +430,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 	initSpecific(api_host);
 	
+	// Load Parcels
 	$.getJSON(api_host + "/sheriff/parcels.json", function (data) 
 	{
 		try
@@ -448,6 +452,39 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		}
 
 	});	
+
+	// Load Markers
+	$.getJSON(api_host + "/sheriff/markers.json", function (data) 
+	{
+		markers = map.data.addGeoJson(data);
+	});
+
+	// Load Text
+	$.getJSON(api_host + "/sheriff/text.json", function (data) 
+	{
+		var buffer = new google.maps.Data();
+		text = buffer.addGeoJson(data);
+
+		for ( var i = 0; i < text.length; i++ )
+		{
+			// Create a label
+			var marker = new google.maps.Marker({
+				position: text[i].getGeometry().get(),
+				label: text[i].getProperty("TEXTSTRING"),
+				map: map,
+				icon: {
+					path: google.maps.SymbolPath.CIRCLE,
+					scale: 0
+				}
+			});
+		}
+
+		// for ( var i = 0; i < text.length; i++ )
+		// {
+		// 	text_map.text[i].getProperty("NUMBER");
+		// }
+	});
+
 
 	mapsScaleMilesHack();
 
