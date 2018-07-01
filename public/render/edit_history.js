@@ -350,7 +350,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	// Create the Map object
 	var starting_zoom = 14;
 
-	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.9513, -109.2292); // Starting position
+	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(34.0136, -109.4554); // Starting position
+	//if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.9513, -109.2292); // Starting position
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
 
 	map = new google.maps.Map(document.getElementById('map'), {
