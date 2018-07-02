@@ -459,9 +459,6 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	$.getJSON(api_host + "/sheriff/markers.json", function (data) 
 	{
 		markers = map.data.addGeoJson(data);
-
-		for ( var i = 0; i < markers.length; i++ )
-			console.log(markers[i]);
 	});
 
 	// Load Text
@@ -471,7 +468,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		text = buffer.addGeoJson(data);
 
 		for ( var i = 0; i < text.length; i++ )
-		{
+		{	
 			// Create a label
 			var marker = new google.maps.Marker({
 				position: text[i].getGeometry().get(),
