@@ -345,8 +345,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 {
 	loadingFadeIn();
 
-	var api_host = "http://localhost:3001";
-	//var api_host = "https://apachecounty.org";
+	//var api_host = "http://localhost:3001";
+	var api_host = "https://apachecounty.org";
 
 	// Create the Map object
 	var starting_zoom = 14;
