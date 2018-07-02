@@ -13,6 +13,7 @@ var parcel_num_markers = []; // Store references to all markers currently on the
 var cons = [];
 var fires = [];
 var markers = [];
+var marker_markers = [];
 var text = [];
 var user_lat_lon = null;
 var current_parcel_marker = null;
@@ -344,14 +345,14 @@ function initParcels(zone_num, starting_lat_lon, callback)
 {
 	loadingFadeIn();
 
-	//var api_host = "http://localhost:3001";
-	var api_host = "https://apachecounty.org";
+	var api_host = "http://localhost:3001";
+	//var api_host = "https://apachecounty.org";
 
 	// Create the Map object
 	var starting_zoom = 14;
 
-	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(34.0136, -109.4554); // Starting position
-	//if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.9513, -109.2292); // Starting position
+	//if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(34.0136, -109.4554); // Starting position
+	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(33.9513, -109.2292); // Starting position
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
 
 	map = new google.maps.Map(document.getElementById('map'), {
@@ -458,6 +459,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	$.getJSON(api_host + "/sheriff/markers.json", function (data) 
 	{
 		markers = map.data.addGeoJson(data);
+
+		for ( var i = 0; i < markers.length; i++ )
+			console.log(markers[i]);
 	});
 
 	// Load Text
@@ -472,18 +476,15 @@ function initParcels(zone_num, starting_lat_lon, callback)
 			var marker = new google.maps.Marker({
 				position: text[i].getGeometry().get(),
 				label: text[i].getProperty("TEXTSTRING"),
-				map: map,
+				map: null,
 				icon: {
 					path: google.maps.SymbolPath.CIRCLE,
 					scale: 0
 				}
 			});
-		}
 
-		// for ( var i = 0; i < text.length; i++ )
-		// {
-		// 	text_map.text[i].getProperty("NUMBER");
-		// }
+			marker_markers.push(marker);
+		}
 	});
 
 

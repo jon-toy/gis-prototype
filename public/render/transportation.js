@@ -23,23 +23,24 @@ function initSpecific(api_host)
             // Transporation
             if ( transportations.indexOf(feature) >= 0 )
             {
+				if (feature.getProperty('selected')) 
+				{
+					return ({
+						strokeColor: "'#20c997'",
+						strokeOpacity: 0.8,
+						strokeWeight: 7,
+						zIndex: 5
+					});
+				}
+				
                 return ({
                     strokeColor: "#FF0000",
                     strokeOpacity: 0.8,
-                    strokeWeight: 7,
+					strokeWeight: 7,
+					zIndex: 5
                 });
 			}
-			
-			// Markers
-			if ( markers.indexOf(feature) >= 0 )
-			{
-				return ({
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 7,
-                });
-			}
-
+		
             // Parcels
 			var color = '#007bff';
 
@@ -63,11 +64,15 @@ function initSpecific(api_host)
         // Show modal on click
 		map.data.addListener('click', function(event) 
 		{	
+			for ( var i = 0; i < transportations.length; i++ )
+				transportations[i].setProperty('selected', false);
+
             event.feature.setProperty('selected', true);
 
             // Transporation
             if ( transportations.indexOf(event.feature) >= 0 )
             {
+				showSitusMarkers(event.feature.getProperty("NUMBER"));
                 return showTransportation(event.feature)
             }
 
@@ -188,5 +193,16 @@ function showTransportation(feature)
 		if ( css_classes ) row.className = css_classes;
 
 		container.appendChild(row);
+	}
+}
+
+function showSitusMarkers(number)
+{
+	for ( var i = 0; i < marker_markers.length; i++ )
+	{
+		if ( marker_markers[i].getLabel().indexOf(number) >= 0 )
+			marker_markers[i].setMap(map);
+		else
+			marker_markers[i].setMap(null);
 	}
 }
