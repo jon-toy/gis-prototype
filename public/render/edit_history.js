@@ -402,6 +402,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 		return /** @type {google.maps.Data.StyleOptions} */({
 			fillColor: color,
+			fillOpacity: 0.1,
 			strokeColor: color,
 			strokeWeight: 1
 			});
