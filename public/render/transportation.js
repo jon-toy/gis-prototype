@@ -52,6 +52,7 @@ function initSpecific(api_host)
 
 			return /** @type {google.maps.Data.StyleOptions} */({
 			fillColor: color,
+			fillOpacity: 0.1,
 			strokeColor: color,
 			strokeWeight: 1
 			});
