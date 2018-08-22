@@ -302,7 +302,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 		return /** @type {google.maps.Data.StyleOptions} */({
 			fillColor: color,
-			fillOpacity: 0.1,
+			fillOpacity: 0.4,
 			strokeColor: color,
 			strokeWeight: 1
 			});
@@ -874,7 +874,7 @@ function initSpecific(api_host)
 
 			return /** @type {google.maps.Data.StyleOptions} */({
 			fillColor: color,
-			fillOpacity: 0.1,
+			fillOpacity: 0.2,
 			strokeColor: color,
 			strokeWeight: 1
 			});
