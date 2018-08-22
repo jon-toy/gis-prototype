@@ -588,7 +588,7 @@ function showFeature(feature)
 
 	// Edit History
 	{
-		$.getJSON("http://apachecounty.org/sheriff/edit-history/" + parcel, function (data)
+		$.getJSON("https://apachecounty.org/sheriff/edit-history/" + parcel, function (data)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 
