@@ -362,6 +362,29 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		markers = map.data.addGeoJson(data);
 	});
 
+	// Load Text
+	$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "text.json", function (data) 
+	{
+		var buffer = new google.maps.Data();
+		text = buffer.addGeoJson(data);
+
+		for ( var i = 0; i < text.length; i++ )
+		{	
+			// Create a label
+			var marker = new google.maps.Marker({
+				position: text[i].getGeometry().get(),
+				label: text[i].getProperty("TEXTSTRING"),
+				map: null,
+				icon: {
+					path: google.maps.SymbolPath.CIRCLE,
+					scale: 0
+				}
+			});
+
+			marker_markers.push(marker);
+		}
+	});
+
 	mapsScaleMilesHack();
 
 	/**
