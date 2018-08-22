@@ -363,7 +363,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	});
 
 	// Load Text
-	$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "text.json", function (data) 
+	$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 	{
 		var buffer = new google.maps.Data();
 		text = buffer.addGeoJson(data);
