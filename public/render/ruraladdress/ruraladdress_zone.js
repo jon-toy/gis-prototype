@@ -19,6 +19,7 @@ var user_lat_lon = null;
 var current_parcel_marker = null;
 var current_zone = null;
 var all_zones = [];
+var edit_history_search_set = [];
 
 var transportation_zone = getUrlParam("zone");
 var valid_transportation_zones = ["south", "west"];
@@ -39,6 +40,7 @@ var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_
 $(document).ready(function() {
 	initFeedback();
 	initParcelParam();
+	initSearchModal();
 
 	$('#search-by-parcel-number-button').click(function(event) {
 
@@ -52,6 +54,82 @@ $(document).ready(function() {
 
   });
 
+/**
+ * Set up the Rural Address Search Modal
+ */
+function initSearchModal() {
+
+	var uri = "https://apachecounty.org/rural-addresses/edit-history/" + transportation_zone;
+
+	var searchBox = document.getElementById("searchValue");
+	$(searchBox).keyup(() => {
+		doSearch(searchBox.value, $("#searchBy option:selected").val());
+	});
+
+	$.getJSON(uri, function (data) 
+	{
+		if ( data.error_message )
+		{
+			console.log(data.error_message);
+			$("#select-mode-inner").show();
+			return;
+		}
+
+		edit_history_search_set = data;
+
+		// Populate initial
+		doSearch(searchBox.value, $(".searchBy option:selected").val());
+	});
+}
+
+function doSearch(value, type) {
+	var results = [];
+	
+	if (type === "situs") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.situs.indexOf(value) >= 0;
+		});
+	} else if ( type === "road") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.road.indexOf(value) >= 0;
+		});
+	}
+	else {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.apn.indexOf(value) >= 0;
+		});
+	}
+
+	renderSearchResults(results);
+
+	function renderSearchResults(results) {
+		var body = document.getElementById("resultsTableBody");
+		body.innerHTML = "";
+
+		for (var i = 0; i < 20 && i < results.length; i++) { // Only show the first 20 results
+			var parcel = results[i];
+			var row = document.createElement("tr");
+			$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
+
+			var cell = document.createElement("td");
+			var link_to_parcel = document.createElement("a");
+			link_to_parcel.innerHTML = "Go to Parcel";
+			link_to_parcel.setAttribute("data-dismiss", "modal");
+			link_to_parcel.setAttribute("href", "#");
+			link_to_parcel.onclick = getParcelFromMapClosure(parcel.apn);
+
+			$(cell).append(link_to_parcel);
+			$(row).append(cell);
+			$(body).append(row);
+		};
+
+		function getParcelFromMapClosure(apn) {
+			return function() {
+				getParcelFromMap(apn);
+			}
+		}
+	}
+}
 function initParcelParam()
 {
 	// Get the parcel
@@ -138,51 +216,6 @@ function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 			}
 		});
 	});
-
-/**
- * Get the feature/parcel from the map, given a parcel number
- * @param {} parcel_num 
- */
-function getParcelFromMap(parcel_num)
-{
-	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
-	if ( parcel_num == null || parcel_num.length <= 0 ) return;
-
-	for ( var i = 0; i < all_features.length; i++ ) 
-	{
-		var feature = all_features[i];
-
-		// Sanitize the input value
-		var sanitized_input = parcel_num.replace('-', '');
-		while ( sanitized_input.indexOf('-') >= 0 )
-		{
-			sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
-		}
-		sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
-
-		// Sanitize the current parcel's parcel number
-		var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
-		sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', '');
-		while ( sanitized_feature_parcel_num.indexOf('-') >= 0 )
-		{
-			sanitized_feature_parcel_num = sanitized_feature_parcel_num.replace('-', ''); // Search ignores hyphens
-		}
-		sanitized_feature_parcel_num = sanitized_feature_parcel_num.toUpperCase(); // Search ignores case
-		
-		// Compare
-		if ( sanitized_input == sanitized_feature_parcel_num )
-		{
-			$("#select-mode-inner").hide();
-
-			showFeature(feature);
-			selectFeature(feature);
-			
-			// Zoom in
-			map.setZoom(14);
-			return;
-		}
-	}
-}
 }
 
 /**
@@ -416,17 +449,17 @@ function getParcelFromMap(parcel_num)
 	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
 	if ( parcel_num == null || parcel_num.length <= 0 ) return;
 
+	// Sanitize the input value
+	var sanitized_input = parcel_num.replace('-', '');
+	while ( sanitized_input.indexOf('-') >= 0 )
+	{
+		sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
+	}
+	sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
+
 	for ( var i = 0; i < all_features.length; i++ ) 
 	{
 		var feature = all_features[i];
-
-		// Sanitize the input value
-		var sanitized_input = parcel_num.replace('-', '');
-		while ( sanitized_input.indexOf('-') >= 0 )
-		{
-			sanitized_input = sanitized_input.replace('-', ''); // Search ignores hyphens
-		}
-		sanitized_input = sanitized_input.toUpperCase(); // Search ignores case
 
 		// Sanitize the current parcel's parcel number
 		var sanitized_feature_parcel_num = feature.getProperty('PARCEL_NUM');
@@ -446,7 +479,7 @@ function getParcelFromMap(parcel_num)
 			selectFeature(feature);
 			
 			// Zoom in
-			map.setZoom(14);
+			map.setZoom(15);
 			return;
 		}
 	}
