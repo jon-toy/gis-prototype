@@ -306,12 +306,12 @@
                       </select>
                 </div>
                 <div class="form-group">
-                    <label for="searchValue" class="control-label">Search</label>
+                    <label for="searchValue" class="control-label">Search Contains</label>
                     <input class="form-control" id="searchValue"/>
                 </div>
               </form>
               <div>
-                  <label for="resultsTable" class="control-label">Results</label>
+                  <label for="resultsTable" class="control-label">Results (<span id="results_total"></span>)</label>
                   <table class="table" id="resultsTable">
                       <thead>
                         <tr>
@@ -330,6 +330,10 @@
                           </td>
                       </tbody>
                     </table>
+              </div>
+              <div>
+                  <a href="#" id="search_previous">Previous 20</a>
+                  <a href="#" class="float-right" id="search_next">Next 20</a>
               </div>
           </div>
           <div class="modal-footer">

@@ -21,6 +21,10 @@ var current_zone = null;
 var all_zones = [];
 var edit_history_search_set = [];
 
+// Search
+var current_search_pagination = 0;
+var search_result_sets = [];
+
 var transportation_zone = getUrlParam("zone");
 var valid_transportation_zones = ["south", "west"];
 var transportation_zones_starting_points = [
@@ -103,29 +107,83 @@ function doSearch(value, type) {
 	renderSearchResults(results);
 
 	function renderSearchResults(results) {
-		var body = document.getElementById("resultsTableBody");
-		body.innerHTML = "";
 
-		for (var i = 0; i < 20 && i < results.length; i++) { // Only show the first 20 results
-			var parcel = results[i];
-			var row = document.createElement("tr");
-			$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
+		$("#results_total").html(results.length);
 
-			var cell = document.createElement("td");
-			var link_to_parcel = document.createElement("a");
-			link_to_parcel.innerHTML = "Go to Parcel";
-			link_to_parcel.setAttribute("data-dismiss", "modal");
-			link_to_parcel.setAttribute("href", "#");
-			link_to_parcel.onclick = getParcelFromMapClosure(parcel.apn);
+		search_result_sets = []; // Split the results up into an array of arrays
+		var arraySize = 20;
+		var i, j;
+		for (i = 0, j = results.length; i < j; i+= arraySize) {
+			var subset = results.splice(i, arraySize);
+			if (subset.length <= 0) break;
+			
+			search_result_sets.push(subset);
+		}
 
-			$(cell).append(link_to_parcel);
-			$(row).append(cell);
-			$(body).append(row);
-		};
+		if (search_result_sets.length <= 0) search_result_sets.push([]);
 
-		function getParcelFromMapClosure(apn) {
-			return function() {
-				getParcelFromMap(apn);
+		current_search_pagination = 0;
+		renderTwentyResults(search_result_sets[current_search_pagination]); // Show the first subset by default
+
+		if (search_result_sets.length >= 1) {
+			renderSearchPagination();
+		}
+
+		function renderTwentyResults(resultssubset) {
+			var body = document.getElementById("resultsTableBody");
+			body.innerHTML = "";
+
+			for (var i = 0; i < resultssubset.length; i++) {
+				var parcel = resultssubset[i];
+				var row = document.createElement("tr");
+				$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
+
+				var cell = document.createElement("td");
+				var link_to_parcel = document.createElement("a");
+				link_to_parcel.innerHTML = "Go to Parcel";
+				link_to_parcel.setAttribute("data-dismiss", "modal");
+				link_to_parcel.setAttribute("href", "#");
+				link_to_parcel.onclick = getParcelFromMapClosure(parcel.apn);
+
+				$(cell).append(link_to_parcel);
+				$(row).append(cell);
+				$(body).append(row);
+			};
+
+			function getParcelFromMapClosure(apn) {
+				return function() {
+					getParcelFromMap(apn);
+				}
+			}
+		}
+		
+		function renderSearchPagination() {
+			$("#search_previous").off();
+			$("#search_next").off();
+
+			if (current_search_pagination == 0) {
+				$("#search_previous").html("");
+			} 
+			else {
+				$("#search_previous").html("Previous 20");
+				
+				$("#search_previous").on("click", function() {
+					current_search_pagination--;
+					renderTwentyResults(search_result_sets[current_search_pagination]);
+					renderSearchPagination();
+				});
+			}
+
+			if (current_search_pagination == search_result_sets.length - 1) {
+				$("#search_next").html("");
+			}
+			else {
+				$("#search_next").html("Next 20");
+				$("#search_next").on("click", function() {
+					current_search_pagination++;
+					renderTwentyResults(search_result_sets[current_search_pagination]);
+					renderSearchPagination();
+				});
 			}
 		}
 	}
