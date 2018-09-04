@@ -296,7 +296,7 @@
             </button>
           </div>
           <div class="modal-body">
-              <form role="form">
+              <form role="form" onsubmit="doSearch();">
                 <div class="form-group">
                     <label for="searchBy" class="control-label">Search By</label>
                     <select class="form-control" id="searchBy">
@@ -312,7 +312,7 @@
               </form>
               <div>
                   <label for="resultsTable" class="control-label">Results (<span id="results_total"></span>)</label>
-                  <table class="table" id="resultsTable">
+                  <table class="table table-hover table-striped" id="resultsTable">
                       <thead>
                         <tr>
                           <th scope="col">APN</th>

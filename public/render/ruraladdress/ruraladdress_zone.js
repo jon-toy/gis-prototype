@@ -66,9 +66,13 @@ function initSearchModal() {
 	var uri = "https://apachecounty.org/rural-addresses/edit-history/" + transportation_zone;
 
 	var searchBox = document.getElementById("searchValue");
-	$(searchBox).keyup(() => {
-		doSearch(searchBox.value, $("#searchBy option:selected").val());
+	$(searchBox).on("input", () => {
+		doSearch();
 	});
+
+	$('#searchBy').on('change', function() {
+		doSearch();
+	  });
 
 	$.getJSON(uri, function (data) 
 	{
@@ -86,7 +90,11 @@ function initSearchModal() {
 	});
 }
 
-function doSearch(value, type) {
+function doSearch() {
+
+	var value = document.getElementById("searchValue").value;
+	var type = $("#searchBy option:selected").val();
+
 	var results = [];
 	
 	if (type === "situs") {
@@ -136,14 +144,16 @@ function doSearch(value, type) {
 			for (var i = 0; i < resultssubset.length; i++) {
 				var parcel = resultssubset[i];
 				var row = document.createElement("tr");
+				row.className = "pointer";
 				$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
 
 				var cell = document.createElement("td");
 				var link_to_parcel = document.createElement("a");
 				link_to_parcel.innerHTML = "Go to Parcel";
-				link_to_parcel.setAttribute("data-dismiss", "modal");
 				link_to_parcel.setAttribute("href", "#");
-				link_to_parcel.onclick = getParcelFromMapClosure(parcel.apn);
+
+				row.setAttribute("data-dismiss", "modal");
+				row.onclick = getParcelFromMapClosure(parcel.apn);
 
 				$(cell).append(link_to_parcel);
 				$(row).append(cell);

@@ -89,6 +89,10 @@ html, body {
     cursor: not-allowed;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 .loading {
     position: fixed;
     z-index: 999;
