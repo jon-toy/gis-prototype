@@ -21,6 +21,8 @@ var current_zone = null;
 var all_zones = [];
 var edit_history_search_set = [];
 
+var transportations = [];
+
 // Search
 var current_search_pagination = 0;
 var search_result_sets = [];
@@ -105,6 +107,21 @@ function doSearch() {
 		results = edit_history_search_set.filter(parcel => {
 			return parcel.road.indexOf(value) >= 0;
 		});
+	} else if ( type === "road_name") {
+		// Get a list of all road numbers that match this road name
+		var roads = transportations.filter(road => {
+			var name = road.getProperty('ROAD_NAME');
+			return name != null && name.indexOf(value) >= 0;
+		});
+
+		roads = roads.map(road => road.getProperty("NUMBER"));
+
+		console.log(roads);
+		results = edit_history_search_set.filter(parcel => {
+			return roads.indexOf(parcel.road) >= 0;
+		});
+		console.log("Results:");
+		console.log(results);
 	}
 	else {
 		results = edit_history_search_set.filter(parcel => {
@@ -146,6 +163,9 @@ function doSearch() {
 				var row = document.createElement("tr");
 				row.className = "pointer";
 				$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
+
+				var roadName = getRoadNameFromNumber(parcel.road);
+				$(row).append("<td>" + (roadName ? roadName : "") + "</td>");
 
 				var cell = document.createElement("td");
 				var link_to_parcel = document.createElement("a");
@@ -926,8 +946,6 @@ function goToUserLatLon()
 	map.setZoom(18);
 }
 
-var transportations = [];
-
 /**
  * Page-specific JS, called after parcel load. Load the transportation lines.
  * @param {*} api_host 
@@ -1083,6 +1101,14 @@ function showTransportation(feature)
 
 		container.appendChild(row);
 	}
+}
+
+function getRoadNameFromNumber(roadNumber) {
+	var road =  transportations.find(road => {
+		return roadNumber == road.getProperty("NUMBER");
+	});
+
+	return (road ? road.getProperty("ROAD_NAME") : null);
 }
 
 function showSitusMarkers(number)
