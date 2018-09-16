@@ -122,7 +122,11 @@ function doSearch() {
 		});
 		console.log("Results:");
 		console.log(results);
-	}
+	} else if ( type === "owner") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.owner.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+		});
+	} 
 	else {
 		results = edit_history_search_set.filter(parcel => {
 			return parcel.apn.indexOf(value) >= 0;
@@ -166,6 +170,8 @@ function doSearch() {
 
 				var roadName = getRoadNameFromNumber(parcel.road);
 				$(row).append("<td>" + (roadName ? roadName : "") + "</td>");
+
+				$(row).append("<td>" + parcel.owner + "</td>");
 
 				var cell = document.createElement("td");
 				var link_to_parcel = document.createElement("a");
@@ -712,6 +718,8 @@ function showFeature(feature)
 		$.getJSON("https://apachecounty.org/sheriff/edit-history/" + parcel, function (data)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
+			renderModalProperty(info_box, "Owner", data.owner);
+			renderModalProperty(info_box, "Remarks", data.remarks);
 
 			if ( data.edits.length > 0 )
 			{
