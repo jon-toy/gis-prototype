@@ -85,6 +85,10 @@ html, body {
     padding: 0;
 }
 
+.modal {
+    font-size: .80rem;
+}
+
 .modal-footer button[disabled] {
     cursor: not-allowed;
 }
