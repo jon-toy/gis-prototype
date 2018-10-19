@@ -62,6 +62,69 @@ app.get('/get-maps', function(req, res) {
 			}); 
 });
 
+// TODO: Update this to read fields from request body and properly format the email
+app.post('/rural-address/send-feedback', (req, res) => {
+	// Get the fields for the email
+	var name = req.body['name'];
+	var email = req.body['email'];
+	var feedback = req.body['feedback'];
+
+	var apn = req.body['parcel[apn]'];
+	var owner = req.body['parcel[owner]'];
+	var remarks = req.body['parcel[remarks]'];
+	var road = req.body['parcel[road]'];
+	var situs = req.body['parcel[situs]'];
+
+	if ( name === null || email === null || feedback === null ) 
+	{
+		return res.json({"success" : false, "message": "Missing name, email, or feedback"});
+	}
+	else
+	{
+		// Send the email
+		var transporter = nodemailer.createTransport({
+			service: 'gmail',
+			auth: {
+				user: 'apachecountyfeedback@gmail.com',
+				pass: 'eggdrop1315'
+			}
+		});
+
+		// Assemble Text
+		var emailHtml = 
+		"Hello,<br>" +
+		"The <a href=\"https://jt.co.apache.az.us/rural_address.html\">Apache County Rural Address App</a>" + 
+		"has received feedback for the following parcel: <br><br>";
+
+		if (apn) emailHtml += "<b>APN</b>: " + apn + "<br>";
+		if (owner) emailHtml += "<b>Owner</b>: " + owner + "<br>";
+		if (remarks) emailHtml += "<b>Remarks</b>: " + remarks + "<br>";
+		if (road) emailHtml += "<b>Road</b>: " + road + "<br>";
+		if (situs) emailHtml += "<b>Situs</b>: " + situs + "<br>";
+
+		emailHtml += "<br><br>";
+
+		emailHtml += "<b>From</b>: " + name + " (" + email + ")<br><br>";
+		emailHtml += feedback;
+		
+		var mailOptions = {
+			from: email,
+			to: 'jonathon.toy@gmail.com',
+			subject: 'Rural Address Feedback',
+			html: emailHtml
+		};
+		
+		transporter.sendMail(mailOptions, function(error, info){
+			if (error) {
+				console.log(error);
+			} else {
+				console.log('Email sent: ' + info.response);
+			}
+		});
+		return res.json({"success" : true, "name": name});
+	}
+});
+
 app.post('/submit-feedback',function(req,res) {
   // g-recaptcha-response is the key that browser will generate upon form submit.
   // if its blank or null means user has not selected the captcha, so return the error.

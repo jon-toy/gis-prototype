@@ -735,8 +735,9 @@ function showFeature(feature)
 		});
 	}
 
-	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
-	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
+	document.getElementById("button-link-parcel-feedback").onclick = () => {
+		showParcelFeedbackModal(parcel);
+	}
 	
 	$("#parcelModal").modal("show");
 
@@ -1120,8 +1121,7 @@ function getRoadNameFromNumber(roadNumber) {
 	return (road ? road.getProperty("ROAD_NAME") : null);
 }
 
-function showSitusMarkers(number)
-{
+function showSitusMarkers(number) {
 	for ( var i = 0; i < marker_markers.length; i++ )
 	{
 		if ( marker_markers[i].getLabel().indexOf(number) >= 0 )
@@ -1129,4 +1129,61 @@ function showSitusMarkers(number)
 		else
 			marker_markers[i].setMap(null);
 	}
+}
+
+function showParcelFeedbackModal(apn) {
+	var parcel = edit_history_search_set.find(parcel => {
+		return parcel.apn == apn;
+	});
+
+	if (parcel == null) return;
+
+	var container = document.getElementById("feedback-parcel-info");
+	container.innerHTML = "";
+
+	console.log(parcel);
+
+	var apn = document.createElement("span");
+	apn.innerHTML = "<b>APN</b>: " + parcel.apn;
+	container.appendChild(apn);
+
+	if (parcel.owner) {
+		container.appendChild(document.createElement("br"));
+
+		var owner = document.createElement("span");
+		owner.innerHTML = "<b>Owner</b>: " + parcel.owner;
+		container.appendChild(owner);
+	}
+	
+	if (parcel.road) {
+		container.appendChild(document.createElement("br"));
+
+		var road = document.createElement("span");
+		road.innerHTML = "<b>Road</b>: " + parcel.road;
+		container.appendChild(road);
+	}
+	
+
+	$("#parcelFeedbackModalLabelTitle").html(parcel.apn);
+	
+	$("#parcelFeedbackModal").modal("show");
+
+	// Remove other handlers from previous modal opens
+	$("#submit-parcel-feedback-button").off();
+
+	$("#submit-parcel-feedback-button").click((e) => {
+		e.preventDefault();
+		// Combine parcel JSON with form data and post as request body (AJAX)
+		var body = {};
+		body.parcel = parcel;
+		body.name = document.getElementById("parcel-feedback-name").value;
+		body.email = document.getElementById("parcel-feedback-email").value;
+		body.feedback = document.getElementById("parcel-feedback-feedback").value;
+
+		if (body.email.length <= 0 || body.name.length <= 0 || body.feedback.length <= 0) return;
+		
+		$.post( "/rural-address/send-feedback", body, function( data ) {
+			$("#parcelFeedbackModal").modal("hide");
+		  });
+	});
 }
