@@ -93,7 +93,7 @@ app.post('/rural-address/send-feedback', (req, res) => {
 		// Assemble Text
 		var emailHtml = 
 		"Hello,<br>" +
-		"The <a href=\"https://jt.co.apache.az.us/rural_address.html\">Apache County Rural Address App</a>" + 
+		"The <a href=\"https://jt.co.apache.az.us/rural_address.html\">Apache County Rural Address App</a> " + 
 		"has received feedback for the following parcel: <br><br>";
 
 		if (apn) emailHtml += "<b>APN</b>: " + apn + "<br>";
@@ -109,7 +109,7 @@ app.post('/rural-address/send-feedback', (req, res) => {
 		
 		var mailOptions = {
 			from: email,
-			to: 'jonathon.toy@gmail.com',
+			to: 'robert.toy@cox.net, jonathon.toy@gmail.com',
 			subject: 'Rural Address Feedback',
 			html: emailHtml
 		};
