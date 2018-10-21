@@ -109,7 +109,7 @@ app.post('/rural-address/send-feedback', (req, res) => {
 		
 		var mailOptions = {
 			from: email,
-			to: 'robert.toy@cox.net, jonathon.toy@gmail.com',
+			to: 'robert.toy@cox.net, jonathon.toy@gmail.com, tdavis@co.apache.az.us',
 			subject: 'Rural Address Feedback',
 			html: emailHtml
 		};
