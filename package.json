@@ -22,7 +22,7 @@
     "jsonfile": "^4.0.0",
     "nodemailer": "^4.6.4",
     "redis": "^2.8.0",
-    "request": "^2.85.0",
+    "request": "^2.88.0",
     "superagent": "^3.8.2"
   }
 }
