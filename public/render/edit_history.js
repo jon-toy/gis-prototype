@@ -706,8 +706,8 @@ function showFeature(feature)
 		});
 	}
 
-	document.getElementById("button-link-assessor").href = "http://www.co.apache.az.us/eagleassessor/?account=" + account_number;
-	document.getElementById("button-link-treasurer").href = "http://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
+	document.getElementById("button-link-assessor").href = "https://www.co.apache.az.us/eagleassessor/?account=" + account_number;
+	document.getElementById("button-link-treasurer").href = "https://www.co.apache.az.us/eagletreasurer/?account=" + account_number;
 	
 	$("#parcelModal").modal("show");
 
