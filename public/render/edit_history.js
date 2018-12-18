@@ -679,7 +679,7 @@ function showFeature(feature)
 
 	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
 
-	renderModalProperty(info_box, "Situs", feature.getProperty('SITUS'));
+	renderModalProperty(info_box, "Situsx", feature.getProperty('SITUS'));
 	renderModalProperty(info_box, "CON", getCon(feature));
 	renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
 	if ( show_mid_bar == true ) renderModalProperty(info_box, "", "", "border-top my-3");

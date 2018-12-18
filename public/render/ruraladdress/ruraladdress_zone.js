@@ -418,24 +418,6 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		event.feature.setProperty('selected', true);
 	});
 
-	// Set colors
-	map.data.setStyle(function(feature) {
-		var color = '#007bff';
-
-		// Change the color of the feature permanently
-		if (feature.getProperty('selected')) 
-		{
-			color = '#20c997';
-		}
-
-		return /** @type {google.maps.Data.StyleOptions} */({
-			fillColor: color,
-			fillOpacity: 0.4,
-			strokeColor: color,
-			strokeWeight: 1
-			});
-	});
-
 	// Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
 	google.maps.event.addListener(map, 'mousemove', function (event) {
 		displayCoordinates(event.latLng);               
@@ -488,6 +470,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 	{
 		markers = map.data.addGeoJson(data);
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setProperty("marker", true);
+		}
 	});
 
 	// Load Text
@@ -720,16 +705,18 @@ function showFeature(feature)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			renderModalProperty(info_box, "Owner", data.owner);
-			renderModalProperty(info_box, "Remarks", data.remarks);
 
 			if ( data.edits.length > 0 )
 			{
-				var edit_history_html = "<ul>";
+				var edit_history_html = "<table class=\"editHistory\"><tr><th>Description</th><th>Date</th></tr>";
 				for ( var i = 0; i < data.edits.length; i++ )
 				{
-					edit_history_html += "<li>" + data.edits[i] + "</li>";
+					edit_history_html += "<tr>";
+					edit_history_html += "<td>" + data.edits[i].text + "</td>";
+					edit_history_html += "<td>" + data.edits[i].date + "</td>";
+					edit_history_html += "</tr>";
 				}
-				edit_history_html += "</ul>";
+				edit_history_html += "</table>";
 				renderModalProperty(info_box, "Edits", edit_history_html);
 			}
 		});
@@ -999,6 +986,10 @@ function initSpecific(api_host)
 			if (feature.getProperty('selected')) 
 			{
 				color = '#20c997';
+			}
+
+			if (feature.getProperty('marker')) {
+				color = "#993300";
 			}
 
 			return /** @type {google.maps.Data.StyleOptions} */({
