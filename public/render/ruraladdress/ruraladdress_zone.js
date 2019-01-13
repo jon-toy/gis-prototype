@@ -59,7 +59,28 @@ $(document).ready(function() {
 
 	mapsScaleMilesHack();
 
-  });
+	initLastModified();
+
+});
+
+/**
+ * Update last modified date in footer from data API
+ */
+function initLastModified() {
+	var uri = "https://apachecounty.org/rural-addresses/edit-history/";
+
+	$.getJSON(uri, function (data) 
+	{
+		var text = document.getElementById("editHistoryLastUpdated");
+
+		var zone = data.zones.find(zone => zone.name == transportation_zone);
+
+		if (zone) {
+			var date = new Date(zone.lastModified);
+			text.innerHTML = "Last Modified: " + (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+		}
+	});
+}
 
 /**
  * Set up the Rural Address Search Modal
