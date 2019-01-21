@@ -89,13 +89,54 @@ function initSearchModal() {
 
 	var uri = "https://apachecounty.org/rural-addresses/edit-history/" + transportation_zone;
 
-	var searchBox = document.getElementById("searchValue");
-	$(searchBox).on("input", () => {
+	// Initial handler
+	$("#searchValue").on("input", () => {
 		doSearch();
 	});
 
 	$('#searchBy').on('change', function() {
-		doSearch();
+		switch($("#searchBy").val()) {
+			case "date":
+				$("#searchValueLabel").html("Edit Date Range");
+				$("#searchValueContainer").html("<input class=\"form-control\" id=\"searchValue\"/>");
+	
+				// Instantiate the date range picker
+				var start = moment().subtract(2, 'months');
+				var end = moment();
+	
+				function cb(start, end) {
+					// Search parcels by edit date
+					doSearchByDate(start, end);
+				}
+				
+				$("#searchValue").daterangepicker({
+					startDate: start,
+					endDate: end,
+					alwaysShowCalendars: true,
+					autoApply: true,
+					maxDate: end,
+					ranges: {
+					   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+					   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+					   'Last 3 Months': [moment().subtract(2, 'months'), moment()],
+					   'Last 6 Months': [moment().subtract(5, 'months'), moment()],
+					}
+				}, cb);
+				
+				doSearchByDate(start, end);
+				
+				break;
+			default: 
+				// Reset the search value container
+				$("#searchValueLabel").html("Search Contains");
+				$("#searchValueContainer").html("<input class=\"form-control\" id=\"searchValue\"/>");
+
+				$("#searchValue").on("input", () => {
+					doSearch();
+				});
+
+				doSearch();
+		}
 	  });
 
 	$.getJSON(uri, function (data) 
@@ -110,8 +151,21 @@ function initSearchModal() {
 		edit_history_search_set = data;
 
 		// Populate initial
-		doSearch(searchBox.value, $(".searchBy option:selected").val());
+		doSearch($("#searchBy").val(), $(".searchBy option:selected").val());
 	});
+}
+
+function doSearchByDate(start, end) {
+	var results = [];
+
+	results = edit_history_search_set.filter(parcel => {
+		return parcel.edits.findIndex(edit => {
+			var searchByDate = moment(edit.date, "MM/DD/YYYY");
+			return searchByDate.isBetween(start, end, 'days', '[]');
+		}) >= 0;
+	});
+
+	renderSearchResults(results);
 }
 
 function doSearch() {
@@ -137,13 +191,9 @@ function doSearch() {
 		});
 
 		roads = roads.map(road => road.getProperty("NUMBER"));
-
-		console.log(roads);
 		results = edit_history_search_set.filter(parcel => {
 			return roads.indexOf(parcel.road) >= 0;
 		});
-		console.log("Results:");
-		console.log(results);
 	} else if ( type === "owner") {
 		results = edit_history_search_set.filter(parcel => {
 			return parcel.owner.toLowerCase().indexOf(value.toLowerCase()) >= 0;
@@ -156,96 +206,97 @@ function doSearch() {
 	}
 
 	renderSearchResults(results);
+}
 
-	function renderSearchResults(results) {
+function renderSearchResults(results) {
 
-		$("#results_total").html(results.length);
+	$("#results_total").html(results.length);
 
-		search_result_sets = []; // Split the results up into an array of arrays
-		var arraySize = 20;
-		var i, j;
-		for (i = 0, j = results.length; i < j; i+= arraySize) {
-			var subset = results.splice(i, arraySize);
-			if (subset.length <= 0) break;
-			
-			search_result_sets.push(subset);
-		}
-
-		if (search_result_sets.length <= 0) search_result_sets.push([]);
-
-		current_search_pagination = 0;
-		renderTwentyResults(search_result_sets[current_search_pagination]); // Show the first subset by default
-
-		if (search_result_sets.length >= 1) {
-			renderSearchPagination();
-		}
-
-		function renderTwentyResults(resultssubset) {
-			var body = document.getElementById("resultsTableBody");
-			body.innerHTML = "";
-
-			for (var i = 0; i < resultssubset.length; i++) {
-				var parcel = resultssubset[i];
-				var row = document.createElement("tr");
-				row.className = "pointer";
-				$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
-
-				var roadName = getRoadNameFromNumber(parcel.road);
-				$(row).append("<td>" + (roadName ? roadName : "") + "</td>");
-
-				$(row).append("<td>" + parcel.owner + "</td>");
-
-				var cell = document.createElement("td");
-				var link_to_parcel = document.createElement("a");
-				link_to_parcel.innerHTML = "Go to Parcel";
-				link_to_parcel.setAttribute("href", "#");
-
-				row.setAttribute("data-dismiss", "modal");
-				row.onclick = getParcelFromMapClosure(parcel.apn);
-
-				$(cell).append(link_to_parcel);
-				$(row).append(cell);
-				$(body).append(row);
-			};
-
-			function getParcelFromMapClosure(apn) {
-				return function() {
-					getParcelFromMap(apn);
-				}
-			}
-		}
+	search_result_sets = []; // Split the results up into an array of arrays
+	var arraySize = 20;
+	var i, j;
+	for (i = 0, j = results.length; i < j; i+= arraySize) {
+		var subset = results.splice(i, arraySize);
+		if (subset.length <= 0) break;
 		
-		function renderSearchPagination() {
-			$("#search_previous").off();
-			$("#search_next").off();
+		search_result_sets.push(subset);
+	}
 
-			if (current_search_pagination == 0) {
-				$("#search_previous").html("");
-			} 
-			else {
-				$("#search_previous").html("Previous 20");
-				
-				$("#search_previous").on("click", function() {
-					current_search_pagination--;
-					renderTwentyResults(search_result_sets[current_search_pagination]);
-					renderSearchPagination();
-				});
-			}
+	if (search_result_sets.length <= 0) search_result_sets.push([]);
 
-			if (current_search_pagination == search_result_sets.length - 1) {
-				$("#search_next").html("");
-			}
-			else {
-				$("#search_next").html("Next 20");
-				$("#search_next").on("click", function() {
-					current_search_pagination++;
-					renderTwentyResults(search_result_sets[current_search_pagination]);
-					renderSearchPagination();
-				});
+	current_search_pagination = 0;
+	renderTwentyResults(search_result_sets[current_search_pagination]); // Show the first subset by default
+
+	if (search_result_sets.length >= 1) {
+		renderSearchPagination();
+	}
+
+	function renderTwentyResults(resultssubset) {
+		var body = document.getElementById("resultsTableBody");
+		body.innerHTML = "";
+
+		for (var i = 0; i < resultssubset.length; i++) {
+			var parcel = resultssubset[i];
+			var row = document.createElement("tr");
+			row.className = "pointer";
+			$(row).append("<td>" + parcel.apn + "</td><td>" + parcel.situs + "</td><td>" + parcel.road + "</td>");
+
+			var roadName = getRoadNameFromNumber(parcel.road);
+			$(row).append("<td>" + (roadName ? roadName : "") + "</td>");
+
+			$(row).append("<td>" + parcel.owner + "</td>");
+
+			var cell = document.createElement("td");
+			var link_to_parcel = document.createElement("a");
+			link_to_parcel.innerHTML = "Go to Parcel";
+			link_to_parcel.setAttribute("href", "#");
+
+			row.setAttribute("data-dismiss", "modal");
+			row.onclick = getParcelFromMapClosure(parcel.apn);
+
+			$(cell).append(link_to_parcel);
+			$(row).append(cell);
+			$(body).append(row);
+		};
+
+		function getParcelFromMapClosure(apn) {
+			return function() {
+				getParcelFromMap(apn);
 			}
 		}
 	}
+	
+	function renderSearchPagination() {
+		$("#search_previous").off();
+		$("#search_next").off();
+
+		if (current_search_pagination == 0) {
+			$("#search_previous").html("");
+		} 
+		else {
+			$("#search_previous").html("Previous 20");
+			
+			$("#search_previous").on("click", function() {
+				current_search_pagination--;
+				renderTwentyResults(search_result_sets[current_search_pagination]);
+				renderSearchPagination();
+			});
+		}
+
+		if (current_search_pagination == search_result_sets.length - 1) {
+			$("#search_next").html("");
+		}
+		else {
+			$("#search_next").html("Next 20");
+			$("#search_next").on("click", function() {
+				current_search_pagination++;
+				renderTwentyResults(search_result_sets[current_search_pagination]);
+				renderSearchPagination();
+			});
+		}
+	}
 }
+
 function initParcelParam()
 {
 	// Get the parcel
@@ -1086,8 +1137,6 @@ function showTransportation(feature)
 {	  
 	map.data.revertStyle();
     map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'blue', strokeColor:'blue'});
-    
-    console.log(feature);
 
     var info_box = document.getElementById('transportation_content');
 	info_box.innerHTML = "";
@@ -1152,8 +1201,6 @@ function showParcelFeedbackModal(apn) {
 
 	var container = document.getElementById("feedback-parcel-info");
 	container.innerHTML = "";
-
-	console.log(parcel);
 
 	var apn = document.createElement("span");
 	apn.innerHTML = "<b>APN</b>: " + parcel.apn;

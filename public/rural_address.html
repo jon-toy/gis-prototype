@@ -26,6 +26,9 @@
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="edit_history.css">
+
+  <!-- Date Range Picker -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 </head>
 <body class="bg-light">
 
@@ -310,11 +313,12 @@
                         <option value="road">Road Number</option>
                         <option value="road_name">Road Name</option>
                         <option value="owner">Owner</option>
+                        <option value="date">Edit Date</option>
                       </select>
                 </div>
                 <div class="form-group">
-                    <label for="searchValue" class="control-label">Search Contains</label>
-                    <input class="form-control" id="searchValue"/>
+                    <label for="searchValue" class="control-label" id="searchValueLabel">Search Contains</label>
+                    <div id="searchValueContainer"><input class="form-control" id="searchValue"/></div>
                 </div>
               </form>
               <div>
@@ -389,6 +393,10 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
    
+  <!-- Date Range Picker -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 	<!-- Bootstrap core JS -->
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
   
