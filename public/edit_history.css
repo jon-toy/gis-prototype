@@ -14,7 +14,8 @@
     }
     
     .navbar-brand {
-        content:"Apache County GIS"
+        content:"Apache County GIS";
+        font-size: 1rem;
     }
 
     .navbar-brand img {
