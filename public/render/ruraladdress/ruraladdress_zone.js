@@ -459,7 +459,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	center: starting_lat_lon,
 	zoom: starting_zoom,
 	fullscreenControl: false,
-	scaleControl: true
+	scaleControl: true,
+	gestureHandling: 'greedy'
 	});
 
 	// Highlight the parcels
