@@ -9,7 +9,10 @@
     }
     
     .navbar-brand {
-        content:"Apache County GIS"
+        content:"Apache County GIS";
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .navbar-brand img {
