@@ -28,10 +28,10 @@ var transportations = [];
 var meta_data = []; // Meta data for all zones. Allows us to see last modified date to know if we should pull from 
 					// localStorage or not
 var load_from_local_storage = {
-	parcels: true,
-	markers: true,
-	roads: true,
-	text: true
+	parcels: false,
+	markers: false,
+	roads: false,
+	text: false
 }
 
 // Search
@@ -57,6 +57,7 @@ var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_
 
 // "Constants" for Local Storage Keys
 var LOCAL_STORAGE_KEY_META_DATA = "meta-data";
+var LOCAL_STORAGE_KEY_ZONE_FLAG = transportation_zone;
 var LOCAL_STORAGE_KEY_MARKERS = transportation_zone + "-markers";
 var LOCAL_STORAGE_KEY_PARCELS = transportation_zone + "-parcels";
 var LOCAL_STORAGE_KEY_ROADS = transportation_zone + "-roads";
@@ -95,7 +96,10 @@ function initMetaData() {
 		// Get the meta data info from local storage to compare
 		var localData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_META_DATA));
 
-		if (localData == null) {
+		// Dirty flag to show if the zone has any local storage data or not
+		var zonePresentFlag = localStorage.getItem(LOCAL_STORAGE_KEY_ZONE_FLAG);
+
+		if (localData == null || zonePresentFlag == null) {
 			// No local storage found, so we'll need to load everything from scratch
 			load_from_local_storage.markers = false;
 			load_from_local_storage.parcels = false;
@@ -104,6 +108,7 @@ function initMetaData() {
 
 			// Save meta-data in local storage
 			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+			localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, "");
 
 			initParcels();
 
