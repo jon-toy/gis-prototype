@@ -622,9 +622,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	initSpecific(api_host);
 	
 	// Load Parcels
-	if (load_from_local_storage.parcels == true) {
+	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_PARCELS));
+	if (load_from_local_storage.parcels == true && data != null) {
 		// Local Storage
-		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_PARCELS));
 		continueLoadingParcels(data);
 	}
 	else {
@@ -664,9 +664,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	
 
 	// Load Markers
-	if (load_from_local_storage.markers == true) {
+	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_MARKERS));
+	if (load_from_local_storage.markers == true && data != null) {
 		// Local Storage
-		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_MARKERS));
 		continueLoadingMarkers(data);
 	}
 	else {
@@ -693,9 +693,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	}
 	
 	// Load Text
-	if (load_from_local_storage.text == true) {
+	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_TEXT));
+	if (load_from_local_storage.text == true && data != null) {
 		// Local Storage
-		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_TEXT));
 		continueLoadingText(data);
 	}
 	else {
@@ -1188,9 +1188,8 @@ function initSpecific(api_host)
     loadingFadeIn();
 
 	// Load Roads
-	if (load_from_local_storage.roads == true) {
-		// Local Storage
-		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_ROADS));
+	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_ROADS));
+	if (load_from_local_storage.roads == true && data != null) {
 		continueLoadingRoads(data);
 	}
 	else {
