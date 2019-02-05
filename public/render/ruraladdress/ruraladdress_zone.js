@@ -109,8 +109,13 @@ function initMetaData() {
 
 			// Save meta-data in local storage. Since we're starting fresh, wipe out the old stuff
 			localStorage.clear();
-			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
-			localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
+			try {
+				localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+				localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
+			}
+			catch (e) {
+
+			}
 
 			initParcels();
 
@@ -155,7 +160,12 @@ function initMetaData() {
 		if (text.lastModified != localText.lastModified) load_from_local_storage.text = false;
 
 		// Something changed, so update local storage
-		localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+		try {
+			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+		}
+		catch (e) {
+			
+		}
 
 		initParcels();
 	});
@@ -622,7 +632,12 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+			try {
+				localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+			}
+			catch (e) {
+				
+			}
 			continueLoadingParcels(data);
 		});	
 	}
@@ -659,7 +674,12 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+			try {
+				localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+			}
+			catch (e) {
+				
+			}
 
 			continueLoadingMarkers(data);
 		});
@@ -683,7 +703,12 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+			try {
+				localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+			}
+			catch (e) {
+				
+			}
 			continueLoadingText(data);
 		});
 	}
@@ -1173,7 +1198,12 @@ function initSpecific(api_host)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			try {
+				localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			}
+			catch (e) {
+				
+			}
 			continueLoadingRoads(data);
 		});
 	}
