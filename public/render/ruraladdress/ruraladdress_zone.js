@@ -3,6 +3,9 @@ Edit History Zone JS is designed to be able to load a transportation zone (parce
 URL parameter. This URL parameter helps decide the path to get from the data API.
 */
 
+const api_host = "http://localhost:3001";
+//const api_host = "https://apachecounty.org";
+
 const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 13; // Hide markers below this threshold
 
 var map, GeoMarker; // Google Maps API objects
@@ -22,6 +25,14 @@ var all_zones = [];
 var edit_history_search_set = [];
 
 var transportations = [];
+var meta_data = []; // Meta data for all zones. Allows us to see last modified date to know if we should pull from 
+					// localStorage or not
+var load_from_local_storage = {
+	parcels: true,
+	markers: true,
+	roads: true,
+	text: true
+}
 
 // Search
 var current_search_pagination = 0;
@@ -44,6 +55,13 @@ if ( trans_zone_index < 0) {
 
 var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_index];
 
+// "Constants" for Local Storage Keys
+var LOCAL_STORAGE_KEY_META_DATA = "meta-data";
+var LOCAL_STORAGE_KEY_MARKERS = transportation_zone + "-markers";
+var LOCAL_STORAGE_KEY_PARCELS = transportation_zone + "-parcels";
+var LOCAL_STORAGE_KEY_ROADS = transportation_zone + "-roads";
+var LOCAL_STORAGE_KEY_TEXT = transportation_zone + "-text";
+
 $(document).ready(function() {
 	initFeedback();
 	initParcelParam();
@@ -64,10 +82,83 @@ $(document).ready(function() {
 });
 
 /**
+ * Load meta data for the zones. Compare with values in local storage to decide if we need to 
+ * re-get the parcel data. If not, load from local storage instead.
+ * 
+ * Also acts as the callback from GMaps
+ */
+function initMetaData() {
+	var uri = api_host + "/rural-addresses/meta-data";
+
+	$.getJSON(uri, function (data) 
+	{
+		// Get the meta data info from local storage to compare
+		var localData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_META_DATA));
+
+		if (localData == null) {
+			// No local storage found, so we'll need to load everything from scratch
+			load_from_local_storage.markers = false;
+			load_from_local_storage.parcels = false;
+			load_from_local_storage.roads = false;
+			load_from_local_storage.text = false;
+
+			// Save meta-data in local storage
+			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+
+			initParcels();
+
+			return;
+		}
+
+		if (JSON.stringify(data) == JSON.stringify(localData))  {
+			initParcels();
+			return; // Identical meta data for all zones, so load all components 
+					// from local storage
+		}
+		
+		// Data is different, so something has changed. Check the current zone
+		var zone = data.find(zone => zone.name == transportation_zone);
+		var localZone = localData.find(zone => zone.name == transportation_zone);
+
+		if (JSON.stringify(zone) == JSON.stringify(localZone)) {
+			initParcels();
+			return; // Identical meta data for this zone, so load all components
+					// from local storage
+		}
+
+		// This zone has changed, so see what's changed
+		// Markers
+		var markers = zone.files.find(file => file.name == "markers.json");
+		var localMarkers = localZone.files.find(file => file.name == "markers.json");
+		if (markers.lastModified != localMarkers.lastModified) load_from_local_storage.markers = false;
+		
+		// Parcels
+		var parcels = zone.files.find(file => file.name == "parcels.json");
+		var localParcels = localZone.files.find(file => file.name == "parcels.json");
+		if (parcels.lastModified != localParcels.lastModified) load_from_local_storage.parcels = false;
+
+		// Roads
+		var roads = zone.files.find(file => file.name == "roads.json");
+		var localRoads = localZone.files.find(file => file.name == "roads.json");
+		if (roads.lastModified != localRoads.lastModified) load_from_local_storage.roads = false;
+
+		// Text
+		var text = zone.files.find(file => file.name == "text.json");
+		var localText = localZone.files.find(file => file.name == "text.json");
+		if (text.lastModified != localText.lastModified) load_from_local_storage.text = false;
+
+		// Something changed, so update local storage
+		localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+
+		initParcels();
+	});
+}
+
+/**
  * Update last modified date in footer from data API
  */
 function initLastModified() {
-	var uri = "https://apachecounty.org/rural-addresses/edit-history/";
+	var uri = api_host + "/rural-addresses/edit-history/";
 
 	$.getJSON(uri, function (data) 
 	{
@@ -87,7 +178,7 @@ function initLastModified() {
  */
 function initSearchModal() {
 
-	var uri = "https://apachecounty.org/rural-addresses/edit-history/" + transportation_zone;
+	var uri = api_host + "/rural-addresses/edit-history/" + transportation_zone;
 
 	// Initial handler
 	$("#searchValue").on("input", () => {
@@ -315,12 +406,12 @@ function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 {
 	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
 
-	var uri = "https://apachecounty.org/parcels/" + parcel_num;
+	var uri = api_host + "/parcels/" + parcel_num;
 
 	if ( parcel_num.startsWith("R") )
 	{
 		// This is an account number instead
-		uri = "https://apachecounty.org/accounts/" + parcel_num;
+		uri = api_host + "/accounts/" + parcel_num;
 	}
 
 	$.getJSON(uri, function (data) 
@@ -344,7 +435,7 @@ function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 		var starting_lat_lon = getPolygonCenter(parcel_poly);
 
 		var book = feature.getProperty("PARCEL_NUM").substring(0, 3);
-		var zone_uri = "https://apachecounty.org/zone/" + book;
+		var zone_uri = api_host + "/zone/" + book;
 		$.getJSON(zone_uri, function (data)
 		{
 			if ( data.error_message )
@@ -444,14 +535,11 @@ function initFeedback()
 function initParcels(zone_num, starting_lat_lon, callback)
 {
 	loadingFadeIn();
-
-	//var api_host = "http://localhost:3001";
-	var api_host = "https://apachecounty.org";
+	
 
 	// Create the Map object
 	var starting_zoom = 14;
 
-	//if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(34.0136, -109.4554); // Starting position
 	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(trans_zone_starting_point.lat, trans_zone_starting_point.lon); // Starting position
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
 
@@ -517,8 +605,22 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	initSpecific(api_host);
 	
 	// Load Parcels
-	$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
-	{
+	if (load_from_local_storage.parcels == true) {
+		// Local Storage
+		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_PARCELS));
+		continueLoadingParcels(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
+		{
+			// Store in local storage
+			localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+			continueLoadingParcels(data);
+		});	
+	}
+
+	function continueLoadingParcels(data) {
 		try
 		{
 			var features = map.data.addGeoJson(data);
@@ -536,21 +638,50 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		{
 			getParcelFromMap(parcel_num_param);
 		}
-
-	});	
+	}
+	
 
 	// Load Markers
-	$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
-	{
+	if (load_from_local_storage.markers == true) {
+		// Local Storage
+		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_MARKERS));
+		continueLoadingMarkers(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
+		{
+			// Store in local storage
+			localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+
+			continueLoadingMarkers(data);
+		});
+	}
+
+	function continueLoadingMarkers(data) {
 		markers = map.data.addGeoJson(data);
 		for (var i = 0; i < markers.length; i++) {
 			markers[i].setProperty("marker", true);
 		}
-	});
-
+	}
+	
 	// Load Text
-	$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
-	{
+	if (load_from_local_storage.text == true) {
+		// Local Storage
+		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_TEXT));
+		continueLoadingText(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
+		{
+			// Store in local storage
+			localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+			continueLoadingText(data);
+		});
+	}
+
+	function continueLoadingText(data) {
 		var buffer = new google.maps.Data();
 		text = buffer.addGeoJson(data);
 
@@ -569,7 +700,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 			marker_markers.push(marker);
 		}
-	});
+	}
 
 	mapsScaleMilesHack();
 
@@ -774,7 +905,7 @@ function showFeature(feature)
 
 	// Edit History
 	{
-		$.getJSON("https://apachecounty.org/sheriff/edit-history/" + parcel, function (data)
+		$.getJSON(api_host + "/sheriff/edit-history/" + parcel, function (data)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			renderModalProperty(info_box, "Owner", data.owner);
@@ -1024,16 +1155,31 @@ function initSpecific(api_host)
 {
     loadingFadeIn();
 
-    $.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
-    {
-        transportations = map.data.addGeoJson(data);
-        loadingFadeOut();
+	// Load Roads
+	if (load_from_local_storage.roads == true) {
+		// Local Storage
+		var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_ROADS));
+		continueLoadingRoads(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
+		{
+			// Store in local storage
+			localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			continueLoadingRoads(data);
+		});
+	}
 
-        // Set colors
+	function continueLoadingRoads(data) {
+		transportations = map.data.addGeoJson(data);
+		loadingFadeOut();
+
+		// Set colors
 		map.data.setStyle(function(feature) {
-            // Transporation
-            if ( transportations.indexOf(feature) >= 0 )
-            {
+			// Transporation
+			if ( transportations.indexOf(feature) >= 0 )
+			{
 				if (feature.getProperty('selected')) 
 				{
 					return ({
@@ -1044,15 +1190,15 @@ function initSpecific(api_host)
 					});
 				}
 				
-                return ({
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.8,
+				return ({
+					strokeColor: "#FF0000",
+					strokeOpacity: 0.8,
 					strokeWeight: 7,
 					zIndex: 5
-                });
+				});
 			}
 		
-            // Parcels
+			// Parcels
 			var color = '#007bff';
 
 			// Change the color of the feature permanently
@@ -1071,52 +1217,52 @@ function initSpecific(api_host)
 			strokeColor: color,
 			strokeWeight: 1
 			});
-        });
+		});
 
-        // Remove all listeners
-        google.maps.event.clearListeners(map.data, 'click');
-        google.maps.event.clearListeners(map.data, 'mouseover');
-        
-        // Show modal on click
+		// Remove all listeners
+		google.maps.event.clearListeners(map.data, 'click');
+		google.maps.event.clearListeners(map.data, 'mouseover');
+		
+		// Show modal on click
 		map.data.addListener('click', function(event) 
 		{	
 			for ( var i = 0; i < transportations.length; i++ )
 				transportations[i].setProperty('selected', false);
 
-            event.feature.setProperty('selected', true);
+			event.feature.setProperty('selected', true);
 
-            // Transporation
-            if ( transportations.indexOf(event.feature) >= 0 )
-            {
+			// Transporation
+			if ( transportations.indexOf(event.feature) >= 0 )
+			{
 				showSitusMarkers(event.feature.getProperty("NUMBER"));
-                return showTransportation(event.feature)
-            }
+				return showTransportation(event.feature)
+			}
 
 			showFeature(event.feature);
-        });
-        
-        // Mouse over
-        map.data.addListener('mouseover', function(event) {
+		});
+		
+		// Mouse over
+		map.data.addListener('mouseover', function(event) {
 			var color = '#28a745';
 			map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
-            displayCoordinates(event.latLng);
-            
-            if ( transportations.indexOf(event.feature) >= 0 )
-            {
-                displayTransportation(event.feature);
+			displayCoordinates(event.latLng);
+			
+			if ( transportations.indexOf(event.feature) >= 0 )
+			{
+				displayTransportation(event.feature);
 			}
 			else if ( transportations.indexOf(event.feature) >= 0 )
-            {
-                displayMarker(event.feature);
+			{
+				displayMarker(event.feature);
 			}
-            else
-            {
-                displayParcel(event.feature);
-            }
+			else
+			{
+				displayParcel(event.feature);
+			}
 
 			current_parcel_marker = labelFeature(event.feature.getProperty('PARCEL_NUM'), event.feature, true);
-        });
-    });
+		});
+	}
 }
 
 /**
