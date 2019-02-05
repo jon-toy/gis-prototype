@@ -3,8 +3,8 @@ Edit History Zone JS is designed to be able to load a transportation zone (parce
 URL parameter. This URL parameter helps decide the path to get from the data API.
 */
 
-const api_host = "http://localhost:3001";
-//const api_host = "https://apachecounty.org";
+//const api_host = "http://localhost:3001";
+const api_host = "https://apachecounty.org";
 
 const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 13; // Hide markers below this threshold
 
