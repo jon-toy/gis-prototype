@@ -620,7 +620,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+			//localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
 			continueLoadingParcels(data);
 		});	
 	}
@@ -657,7 +657,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+			//localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
 
 			continueLoadingMarkers(data);
 		});
@@ -681,7 +681,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+			//localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
 			continueLoadingText(data);
 		});
 	}
@@ -1171,7 +1171,7 @@ function initSpecific(api_host)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
 		{
 			// Store in local storage
-			localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			//localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
 			continueLoadingRoads(data);
 		});
 	}
