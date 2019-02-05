@@ -28,10 +28,10 @@ var transportations = [];
 var meta_data = []; // Meta data for all zones. Allows us to see last modified date to know if we should pull from 
 					// localStorage or not
 var load_from_local_storage = {
-	parcels: false,
-	markers: false,
-	roads: false,
-	text: false
+	parcels: true,
+	markers: true,
+	roads: true,
+	text: true
 }
 
 // Search
@@ -57,11 +57,11 @@ var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_
 
 // "Constants" for Local Storage Keys
 var LOCAL_STORAGE_KEY_META_DATA = "meta-data";
-var LOCAL_STORAGE_KEY_ZONE_FLAG = transportation_zone;
-var LOCAL_STORAGE_KEY_MARKERS = transportation_zone + "-markers";
-var LOCAL_STORAGE_KEY_PARCELS = transportation_zone + "-parcels";
-var LOCAL_STORAGE_KEY_ROADS = transportation_zone + "-roads";
-var LOCAL_STORAGE_KEY_TEXT = transportation_zone + "-text";
+var LOCAL_STORAGE_KEY_ZONE_FLAG = "zone";
+var LOCAL_STORAGE_KEY_MARKERS =  "markers";
+var LOCAL_STORAGE_KEY_PARCELS =  "parcels";
+var LOCAL_STORAGE_KEY_ROADS =  "roads";
+var LOCAL_STORAGE_KEY_TEXT =  "text";
 
 $(document).ready(function() {
 	initFeedback();
@@ -96,19 +96,21 @@ function initMetaData() {
 		// Get the meta data info from local storage to compare
 		var localData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_META_DATA));
 
-		// Dirty flag to show if the zone has any local storage data or not
-		var zonePresentFlag = localStorage.getItem(LOCAL_STORAGE_KEY_ZONE_FLAG);
+		// Flag to show which zone is currently in local storage, if any
+		var zoneFlag = localStorage.getItem(LOCAL_STORAGE_KEY_ZONE_FLAG);
 
-		if (localData == null || zonePresentFlag == null) {
-			// No local storage found, so we'll need to load everything from scratch
+		// Check if local storage meta data is here, if zone data is here, 
+		// and if the zone in storage is the one we want to load. If not, load everything from scratch.
+		if (localData == null || zoneFlag != transportation_zone) {
 			load_from_local_storage.markers = false;
 			load_from_local_storage.parcels = false;
 			load_from_local_storage.roads = false;
 			load_from_local_storage.text = false;
 
-			// Save meta-data in local storage
+			// Save meta-data in local storage. Since we're starting fresh, wipe out the old stuff
+			localStorage.clear();
 			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
-			localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, "");
+			localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
 
 			initParcels();
 
@@ -620,7 +622,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
 		{
 			// Store in local storage
-			//localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+			localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
 			continueLoadingParcels(data);
 		});	
 	}
@@ -657,7 +659,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 		{
 			// Store in local storage
-			//localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+			localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
 
 			continueLoadingMarkers(data);
 		});
@@ -681,7 +683,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 		{
 			// Store in local storage
-			//localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+			localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
 			continueLoadingText(data);
 		});
 	}
@@ -1171,7 +1173,7 @@ function initSpecific(api_host)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
 		{
 			// Store in local storage
-			//localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
 			continueLoadingRoads(data);
 		});
 	}
