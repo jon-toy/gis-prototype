@@ -1415,7 +1415,7 @@ function showParcelFeedbackModal(apn) {
 function localStorageSetItem(key, valueAsString) {
 	try {
 		// Take the string and compress it
-		var compressedString = LZString.compress(valueAsString);
+		var compressedString = LZString.compressToUTF16(valueAsString);
 
 		localStorage.setItem(key, compressedString);
 	}
@@ -1453,7 +1453,7 @@ function localStorageGetItemAsString(key) {
 		if (compressedString == null) return null;
 
 		// Uncompress the string
-		var uncompressedString = LZString.decompress(compressedString);
+		var uncompressedString = LZString.decompressFromUTF16(compressedString);
 		return uncompressedString;
 	}
 	catch (e) {
