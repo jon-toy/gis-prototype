@@ -94,10 +94,10 @@ function initMetaData() {
 	$.getJSON(uri, function (data) 
 	{
 		// Get the meta data info from local storage to compare
-		var localData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_META_DATA));
+		var localData = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_META_DATA);
 
 		// Flag to show which zone is currently in local storage, if any
-		var zoneFlag = localStorage.getItem(LOCAL_STORAGE_KEY_ZONE_FLAG);
+		var zoneFlag = localStorageGetItemAsString(LOCAL_STORAGE_KEY_ZONE_FLAG);
 
 		// Check if local storage meta data is here, if zone data is here, 
 		// and if the zone in storage is the one we want to load. If not, load everything from scratch.
@@ -110,8 +110,9 @@ function initMetaData() {
 			// Save meta-data in local storage. Since we're starting fresh, wipe out the old stuff
 			localStorage.clear();
 			try {
-				localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
-				localStorage.setItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
+				localStorageSetItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
+				localStorageSetItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
+
 			}
 			catch (e) {
 
@@ -160,12 +161,7 @@ function initMetaData() {
 		if (text.lastModified != localText.lastModified) load_from_local_storage.text = false;
 
 		// Something changed, so update local storage
-		try {
-			localStorage.setItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
-		}
-		catch (e) {
-			
-		}
+		localStorageSetItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
 
 		initParcels();
 	});
@@ -622,7 +618,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	initSpecific(api_host);
 	
 	// Load Parcels
-	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_PARCELS));
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_PARCELS);
 	if (load_from_local_storage.parcels == true && data != null) {
 		// Local Storage
 		continueLoadingParcels(data);
@@ -632,12 +628,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/parcels.json", function (data) 
 		{
 			// Store in local storage
-			try {
-				localStorage.setItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
-			}
-			catch (e) {
-				
-			}
+			localStorageSetItem(LOCAL_STORAGE_KEY_PARCELS, JSON.stringify(data));
+
 			continueLoadingParcels(data);
 		});	
 	}
@@ -664,7 +656,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	
 
 	// Load Markers
-	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_MARKERS));
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
 	if (load_from_local_storage.markers == true && data != null) {
 		// Local Storage
 		continueLoadingMarkers(data);
@@ -674,12 +666,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 		{
 			// Store in local storage
-			try {
-				localStorage.setItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
-			}
-			catch (e) {
-				
-			}
+			localStorageSetItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
 
 			continueLoadingMarkers(data);
 		});
@@ -693,7 +680,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	}
 	
 	// Load Text
-	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_TEXT));
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
 	if (load_from_local_storage.text == true && data != null) {
 		// Local Storage
 		continueLoadingText(data);
@@ -703,12 +690,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 		{
 			// Store in local storage
-			try {
-				localStorage.setItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
-			}
-			catch (e) {
-				
-			}
+			localStorageSetItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+	
 			continueLoadingText(data);
 		});
 	}
@@ -1188,7 +1171,7 @@ function initSpecific(api_host)
     loadingFadeIn();
 
 	// Load Roads
-	var data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_ROADS));
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_ROADS);
 	if (load_from_local_storage.roads == true && data != null) {
 		continueLoadingRoads(data);
 	}
@@ -1197,12 +1180,8 @@ function initSpecific(api_host)
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
 		{
 			// Store in local storage
-			try {
-				localStorage.setItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
-			}
-			catch (e) {
-				
-			}
+			localStorageSetItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+			
 			continueLoadingRoads(data);
 		});
 	}
@@ -1428,4 +1407,56 @@ function showParcelFeedbackModal(apn) {
 			$("#parcelFeedbackModal").modal("hide");
 		  });
 	});
+}
+
+/**
+ * Store a compressed string into localStorage. Perform error handling too
+ */
+function localStorageSetItem(key, valueAsString) {
+	try {
+		// Take the string and compress it
+		var compressedString = LZString.compress(valueAsString);
+
+		localStorage.setItem(key, compressedString);
+	}
+	catch (e) {
+		console.log(e);
+	}
+}
+
+/**
+ * Get an item from localStorage, uncompress and return as an Object. If not found, return null
+ * @param {*} key 
+ */
+function localStorageGetItemAsObject(key) {
+	try {
+		return JSON.parse(localStorageGetItemAsString(key));
+	}
+	catch (e) {
+		console.log(e);
+	}
+
+	return null;
+}
+
+/**
+ * Get an item from localStorage, uncompress and return as a String. If not found, return null
+ * @param {*} key 
+ */
+function localStorageGetItemAsString(key) {
+	var compressedString = null;
+	try {
+		compressedString = localStorage.getItem(key);
+
+		if (compressedString == null) return null;
+
+		// Uncompress the string
+		var uncompressedString = LZString.decompress(compressedString);
+		return uncompressedString;
+	}
+	catch (e) {
+		console.log(e);
+	}
+	 
+	return null;
 }
