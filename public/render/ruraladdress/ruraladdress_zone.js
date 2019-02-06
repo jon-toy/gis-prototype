@@ -621,6 +621,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_PARCELS);
 	if (load_from_local_storage.parcels == true && data != null) {
 		// Local Storage
+		console.log("Loaded from localStorage: Parcels");
 		continueLoadingParcels(data);
 	}
 	else {
@@ -659,6 +660,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
 	if (load_from_local_storage.markers == true && data != null) {
 		// Local Storage
+		console.log("Loaded from localStorage: Markers");
 		continueLoadingMarkers(data);
 	}
 	else {
@@ -683,6 +685,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
 	if (load_from_local_storage.text == true && data != null) {
 		// Local Storage
+		console.log("Loaded from localStorage: Text");
 		continueLoadingText(data);
 	}
 	else {
@@ -1173,6 +1176,8 @@ function initSpecific(api_host)
 	// Load Roads
 	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_ROADS);
 	if (load_from_local_storage.roads == true && data != null) {
+		// Local Storage
+		console.log("Loaded from localStorage: Roads");
 		continueLoadingRoads(data);
 	}
 	else {
@@ -1431,7 +1436,6 @@ function localStorageSetItem(key, valueAsString) {
 function localStorageGetItemAsObject(key) {
 	try {
 		var obj = JSON.parse(localStorageGetItemAsString(key));
-		console.log("Loaded from localStorage: " + key);
 		return obj;
 	}
 	catch (e) {
