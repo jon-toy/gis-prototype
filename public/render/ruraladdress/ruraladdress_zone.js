@@ -1430,7 +1430,9 @@ function localStorageSetItem(key, valueAsString) {
  */
 function localStorageGetItemAsObject(key) {
 	try {
-		return JSON.parse(localStorageGetItemAsString(key));
+		var obj = JSON.parse(localStorageGetItemAsString(key));
+		console.log("Loaded from localStorage: " + key);
+		return obj;
 	}
 	catch (e) {
 		console.log(e);
