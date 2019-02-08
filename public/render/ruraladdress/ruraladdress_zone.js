@@ -927,6 +927,7 @@ function showFeature(feature)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			renderModalProperty(info_box, "Owner", data.owner);
+			renderModalProperty(info_box, "Remarks", data.remarks);
 
 			if ( data.edits.length > 0 )
 			{
