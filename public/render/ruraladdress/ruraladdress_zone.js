@@ -1343,8 +1343,11 @@ function showTransportation(feature)
 }
 
 function getRoadNameFromNumber(roadNumber) {
+	var roadNumberUpper = roadNumber.toUpperCase();
 	var road =  transportations.find(road => {
-		return roadNumber == road.getProperty("NUMBER");
+		var loopRoad = road.getProperty("NUMBER");
+		if (loopRoad) loopRoad = loopRoad.toUpperCase();
+		return roadNumberUpper == loopRoad;
 	});
 
 	return (road ? road.getProperty("ROAD_NAME") : null);
