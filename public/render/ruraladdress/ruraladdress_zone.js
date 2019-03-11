@@ -294,9 +294,16 @@ function doSearch() {
 			return name != null && name.indexOf(value) >= 0;
 		});
 
-		roads = roads.map(road => road.getProperty("NUMBER"));
+		roads = roads.map(road => {
+			var roadNum = road.getProperty("NUMBER");
+			if (roadNum) roadNum = roadNum.toUpperCase();
+			return roadNum;
+		});
+
 		results = edit_history_search_set.filter(parcel => {
-			return roads.indexOf(parcel.road) >= 0;
+			var parcelRoadUpper = parcel.road;
+			if (parcelRoadUpper) parcelRoadUpper = parcelRoadUpper.toUpperCase();
+			return roads.indexOf(parcelRoadUpper) >= 0;
 		});
 	} else if ( type === "owner") {
 		results = edit_history_search_set.filter(parcel => {
