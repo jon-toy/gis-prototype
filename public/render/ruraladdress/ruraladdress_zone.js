@@ -1213,7 +1213,7 @@ function initSpecific(api_host)
 					return ({
 						strokeColor: "'#20c997'",
 						strokeOpacity: 0.8,
-						strokeWeight: 7,
+						strokeWeight: 3,
 						zIndex: 5
 					});
 				}
@@ -1221,7 +1221,7 @@ function initSpecific(api_host)
 				return ({
 					strokeColor: "#FF0000",
 					strokeOpacity: 0.8,
-					strokeWeight: 7,
+					strokeWeight: 3,
 					zIndex: 5
 				});
 			}
