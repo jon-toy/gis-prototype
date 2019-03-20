@@ -1,6 +1,6 @@
 const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 13; // Hide markers below this threshold
 
-var map, GeoMarker, measureTool; // Google Maps API objects
+var map, GeoMarker; // Google Maps API objects
 var geo_json_urls = []; // URLs for all the GeoJSON objects after listing the results from the server.
 						// Global so we can access it in callbacks
 var all_features = []; // Unreliable on page load. Used for calls to action after page render
@@ -11,7 +11,6 @@ var user_lat_lon = null;
 var current_parcel_marker = null;
 var current_zone = null;
 var all_zones = [];
-var measure_mode = false;
 var click_listener = null;
 var measure_overlay = null;
 
@@ -343,58 +342,6 @@ function initZones()
 	}
 }
 
-/**
- * The CenterControl adds a control to the map that recenters the map on
- * Chicago.
- * This constructor takes the control DIV as an argument.
- * @constructor
- */
-function MeasureControl(controlDiv, map) {
-
-	controlDiv.style.marginLeft = '10px';
-
-	// Set CSS for the control border.
-	var controlUI = document.createElement('div');
-	controlUI.style.backgroundColor = '#fff';
-	controlUI.style.border = '2px solid #fff';
-	controlUI.style.borderRadius = '3px';
-	controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-	controlUI.style.cursor = 'pointer';
-	controlUI.style.marginBottom = '22px';
-	controlUI.style.textAlign = 'center';
-	controlUI.title = (measure_mode == true ? 'Click to close measure controls' : 'Click to launch measure controls');
-	controlDiv.appendChild(controlUI);
-
-	// Set CSS for the control interior.
-	var controlText = document.createElement('div');
-	controlText.style.color = 'rgb(25,25,25)';
-	controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-	controlText.style.fontSize = '16px';
-	controlText.style.lineHeight = '38px';
-	controlText.style.paddingLeft = '5px';
-	controlText.style.paddingRight = '5px';
-	controlText.innerHTML = (measure_mode == true ? 'Cancel' : 'Measure Tool');
-	controlUI.appendChild(controlText);
-
-	// Setup the click event listeners: simply set the map to Chicago.
-	controlUI.addEventListener('click', () => {
-		if (measure_mode == false ) {
-			measure_mode = true;
-			controlText.innerHTML = 'Cancel';
-			measureTool.start();
-
-			map.data.setStyle(getFeatureStyle(false));
-		}
-		else {
-			measure_mode = false;
-			controlText.innerHTML = 'Measure Tool';
-			measureTool.end();
-			map.data.setStyle(getFeatureStyle(true));
-		}
-	});
-
-}
-
 function getFeatureStyle(clickable)
 {
 	return function(feature) {
@@ -453,17 +400,8 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		gestureHandling: 'greedy'
 		});
 
-		measureTool = new MeasureTool(map, {
-			unit: MeasureTool.UnitTypeId.IMPERIAL
-		});
-
-		 // Create the DIV to hold the control and call the CenterControl()
-        // constructor passing in this DIV.
-        var centerControlDiv = document.createElement('div');
-        var measureControl = new MeasureControl(centerControlDiv, map);
-
-        centerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(centerControlDiv);
+		// Load the measure tool from measure_tool.js
+		initializeMeasureTool();
 
 		// Highlight the parcels
 		map.data.addListener('mouseover', function(event) {
@@ -543,11 +481,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 				if ( load_completed.length == geo_json_urls.length ) 
 				{
 					loadingFadeOut();
-					console.log(all_features);
 					current_zone = zone_num;
 					if ( current_zone == null ) current_zone = 'all';
 					if ( callback ) callback();
-					console.log("Total Parcels: " + all_features.length);
 				}
 				else
 				{

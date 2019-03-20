@@ -571,6 +571,9 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	gestureHandling: 'greedy'
 	});
 
+	// Load the measure tool from measure_tool.js
+	initializeMeasureTool();
+
 	// Highlight the parcels
 	map.data.addListener('mouseover', function(event) {
 		var color = '#28a745';
