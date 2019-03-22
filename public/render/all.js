@@ -227,8 +227,6 @@ function initZones()
 
 	});
 
-	initGeoCode();
-
 	// Load the Zone GeoJSON
 	$.getJSON("https://apachecounty.org/zones/zones.json", function (data) 
 	{
@@ -430,6 +428,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		}	
 
 		mapsScaleMilesHack();
+		initGeoCode();
 	});
 }
 
