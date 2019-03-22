@@ -327,21 +327,40 @@
    
 	<!-- Bootstrap core JS -->
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-  
+
+  <!-- Distance Tool External -->
+  <script src="https://cdn.jsdelivr.net/npm/measuretool-googlemaps-v3/lib/MeasureTool.min.js"></script>
+
+  <!-- Recaptcha -->
+  <script src='https://www.google.com/recaptcha/api.js' async defer></script>
+
+  <!-- Modules -->
+    <!-- Globals -->
+    <script src="/render/modules/globals.js"></script>
+
+    <!-- Helper -->
+    <script src="/render/modules/helper.js"></script>
+
+    <!-- Distance Tool -->
+    <script src="/render/modules/measure_tool.js"></script>
+
+    <!-- Feedback Modal -->
+    <script src="/render/modules/feedback_modal.js"></script>
+
+    <!-- Fire/Con -->
+    <script src="/render/modules/fire_con.js"></script>
+
+    <!-- Map -->
+    <script src="/render/modules/map.js"></script>
+  <!-- End Modules-->
+
   <!-- Main JS -->
   <script src="/render/all.js"></script>
 
   <!-- Page specific JS -->
   <script src="/render/default.js"></script>
-  
+
   <!-- Google Maps -->
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initModeSelect&libraries=geometry"
   async defer></script>
-
-  <!-- Distance Tool -->
-  <script src="https://cdn.jsdelivr.net/npm/measuretool-googlemaps-v3/lib/MeasureTool.min.js"></script>
-  <script src="/render/modules/measure_tool.js"></script>
-
-  <!-- Recaptcha -->
-  <script src='https://www.google.com/recaptcha/api.js' async defer></script>
 </html>

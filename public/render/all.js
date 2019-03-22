@@ -1,16 +1,3 @@
-const FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD = 13; // Hide markers below this threshold
-
-var map, GeoMarker; // Google Maps API objects
-var geo_json_urls = []; // URLs for all the GeoJSON objects after listing the results from the server.
-						// Global so we can access it in callbacks
-var all_features = []; // Unreliable on page load. Used for calls to action after page render
-var parcel_num_markers = []; // Store references to all markers currently on the page so we can manipulate en masse
-var cons = [];
-var fires = [];
-var user_lat_lon = null;
-var current_parcel_marker = null;
-var current_zone = null;
-var all_zones = [];
 var click_listener = null;
 var measure_overlay = null;
 
@@ -116,6 +103,7 @@ function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 			}
 		});
 	});
+}
 
 /**
  * Get the feature/parcel from the map, given a parcel number
@@ -161,20 +149,6 @@ function getParcelFromMap(parcel_num)
 		}
 	}
 }
-}
-
-/**
- * Helper function to get URL Parameters
- * @param {*} name of the parameter
- */
-function getUrlParam(name)
-{
-	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-
-	if ( results == null ) return null;
-
-	return results[1] || 0;
-}
 
 /**
  * 
@@ -188,48 +162,11 @@ function selectMode(mode)
 }
 
 /**
- * Set up the reCaptcha listeners
- */
-function initFeedback()
-{
-	window.verifyRecaptchaCallback = function (response) {
-        $('input[data-recaptcha]').val(response).trigger('change')
-    }
-
-    window.expiredRecaptchaCallback = function () {
-        $('input[data-recaptcha]').val("").trigger('change')
-    }
-
-	$('#submit-feedback-form').submit(function() {
-	  $(this).ajaxSubmit({
-		error: function(xhr) {
-		  status('Error: ' + xhr.status);
-		},
-	   success: function(response) {
-		if ( response.success == true )
-		{
-			alert("Thank you for submitting feedback, " + response.name + "!");
-			$('#feedbackModal').modal('hide');
-		}
-		else
-		{
-			alert(response.message);
-		}
-
-		grecaptcha.reset();
-	   }
-	  });
-
-	  //Very important line, it disable the page refresh.
-	  return false;
-	});
-}  
-
-/**
  * After Maps API is loaded, await user input
  */
 function initModeSelect()
 {
+
 }
 
 /**
@@ -456,7 +393,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 		});
 
 		// Load sheriff specific GeoJSONs
-		initSheriff(api_host);
+		initFireCon(api_host);
 
 		initSpecific(api_host);
 		
@@ -494,127 +431,6 @@ function initParcels(zone_num, starting_lat_lon, callback)
 
 		mapsScaleMilesHack();
 	});
-
-	/**
-	 * Grab cons and fire GeoJSONs to load them specially into memory
-	 * @param {} api_host 
-	 */
-	function initSheriff(api_host)
-	{
-		var buffer = new google.maps.Data();
-
-		$.getJSON(api_host + "/sheriff/con.json", function (data) 
-		{
-			cons = buffer.addGeoJson(data);
-		});
-
-		$.getJSON(api_host + "/sheriff/fire.json", function (data) 
-		{
-			fires = buffer.addGeoJson(data);
-		});
-	}
-}
-
-/**
- * Display the Parcel Number on the bottom bar
- * @param {*} feature 
- */
-function displayParcel(feature) 
-{
-	document.getElementById("parcel-num-display").innerHTML = "Parcel Number: " + feature.getProperty('PARCEL_NUM');
-}
-
-/**
- * Hack to force a click to set the km to miles on the map
- */
-function mapsScaleMilesHack()
-{
-	var scaleInterval = setInterval( function() {
-		var spn = document.getElementById('map').getElementsByTagName('span');
-		var pattern = /\d+\s+(m|km)/i;
-		for(var i in spn) {
-			if ( pattern.test(spn[i].innerHTML) ) {
-			spn[i].click();
-			clearInterval(scaleInterval);
-			}
-		}
-		}, 500);
-		setTimeout( function() { clearInterval(scaleInterval) }, 20000 );
-}
-
-/**
- * Initialize the GeoLocation so the user can see where they are on the map
- */
-function initGeoCode()
-{
-	// GeoMarker stuff
-	locate();
-	function locate()
-	{
-        navigator.geolocation.getCurrentPosition(geoInit);
-    }
-	
-	function geoInit(position)
-	{
-		user_lat_lon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-		
-		 var userMarker = new google.maps.Marker({
-				position: user_lat_lon,
-				map: map,
-				icon: "/geolocation-icon.png"
-			});
-	}
-}
-
-/**
- * Turn on the loading screen
- */
-function loadingFadeOut(speed)
-{
-	if ( speed == null ) speed = 1500;
-	$(".loading").fadeOut(speed);
-	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
-	{
-		// Don't fade the logo in on mobile
-	}
-	else
-	{
-		$("#logo-container").fadeIn(speed);
-	}
-
-	document.getElementById("loading-message-status").innerHTML = "";
-}
-
-/**
- * Turn off the loading screen
- */
-function loadingFadeIn(speed)
-{
-	document.getElementById("loading-message-status").innerHTML = "";
-
-	if ( speed == null ) speed = 1500;
-	$(".loading").fadeIn(speed);
-	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
-	{
-		// Don't fade the logo in on mobile
-	}
-	else
-	{
-		$("#logo-container").fadeOut(speed);
-	}
-}
-
-/**
- * Display the Lat/Lon on the bottom bar
- * @param {*} pnt 
- */
-function displayCoordinates(pnt) 
-{
-	var lat = pnt.lat();
-	lat = lat.toFixed(4);
-	var lng = pnt.lng();
-	lng = lng.toFixed(4);
-	document.getElementById("latlon-display").innerHTML = lat + ", " + lng;
 }
 
 /**
@@ -666,218 +482,6 @@ function showFeature(feature)
 	$("#parcelModal").modal("show");
 
 	selectFeature(feature);
-
-	function getFireDistrict(parcel)
-	{
-		var parcel_geom = parcel.getGeometry();
-		var parcel_poly = new google.maps.Polygon({
-			paths: parcel_geom.getAt(0).getArray(),
-		});
-
-		var ret = null;
-
-		$.each( fires, function( index, fire ) {
-			var fire_geom = fire.getGeometry();
-			var fire_poly = new google.maps.Polygon({
-				paths: fire_geom.getAt(0).getArray(),
-			});
-
-			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), fire_poly) == true )
-			{
-				ret = fire.getProperty("DISTRICT");
-				return;
-			}
-		});
-
-		return ret;
-	}
-
-	function getCon(parcel)
-	{
-		var parcel_geom = parcel.getGeometry();
-		var parcel_poly = new google.maps.Polygon({
-			paths: parcel_geom.getAt(0).getArray(),
-		});
-
-		var ret = null;
-
-		$.each( cons, function( index, con ) {
-			var con_geom = con.getGeometry();
-			var con_poly = new google.maps.Polygon({
-				paths: con_geom.getAt(0).getArray(),
-			});
-
-			if ( google.maps.geometry.poly.containsLocation(getPolygonCenter(parcel_poly), con_poly) == true )
-			{
-				ret = con.getProperty("CON_NUMBER") + " " + con.getProperty("CON_NAME");
-				return;
-			}
-		});
-
-		return ret;
-	}
-}
-
-function renderModalProperty(container, title, content, css_classes)
-	{
-		if ( content == null ) return;
-
-		var row = document.createElement('div');
-		row.className = "row p-2";
-
-		var title_container = document.createElement('div');
-		title_container.className = 'col-3';
-		title_container.innerHTML = '<b>' + title + '</b>';
-		row.appendChild(title_container);
-
-		var content_container = document.createElement('div');
-		content_container.className = 'col-9';
-		content_container.innerHTML = content;
-		row.appendChild(content_container);
-
-		if ( css_classes ) row.className = css_classes;
-
-		container.appendChild(row);
-	}
-
-/**
- * Draw a label on the map. The contents of the label are the feature's PARCEL_NUM property
- * @param {*} feature 
- */
-function labelFeature(label_text, feature, ignore_zoom_restriction, manual_lat_lon)
-{
-	if ( ignore_zoom_restriction != true && map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD || label_text == null ) return; // Don't show labels when zoomed out so much
-	// Place a marker on there
-	var geom = feature.getGeometry();
-	var poly = new google.maps.Polygon({
-		paths: geom.getAt(0).getArray(),
-	});
-
-	var lat_lon = manual_lat_lon;
-	if ( lat_lon == null ) lat_lon = getPolygonCenter(poly); // Deault to center of Polygon
-
-	var marker = new google.maps.Marker({
-	  position: lat_lon,
-	  map: map,
-	  label: label_text,
-	  icon: "blank.png"
-	});
-
-	parcel_num_markers.push(marker);
-
-	return marker;
-}
-
-/**
- * Change the style of the feature that is selected, and pan to it
- * @param {*} selected_feature 
- */
-function selectFeature(selected_feature)
-{
-	// Style and color the selected feature
-	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-
-	labelFeature(selected_feature.getProperty('PARCEL_NUM'), selected_feature);
-
-	var geom = selected_feature.getGeometry();
-	var poly = new google.maps.Polygon({
-		paths: geom.getAt(0).getArray(),
-	});
-	var center = getPolygonCenter(poly);
-	map.panTo(center);
-
-	selected_feature.setProperty('selected', true);
-}
-
-/**
- * Get the center of a Polygon. Code found at
- * https://gist.github.com/jeremejazz/9407568
- * @param {*} poly 
- */
-function getPolygonCenter(poly) 
-{
-	var lowx,
-		highx,
-		lowy,
-		highy,
-		lats = [],
-		lngs = [],
-		vertices = poly.getPath();
-
-	for(var i=0; i<vertices.length; i++) {
-		lngs.push(vertices.getAt(i).lng());
-		lats.push(vertices.getAt(i).lat());
-	}
-
-	lats.sort();
-	lngs.sort();
-	lowx = lats[0];
-	highx = lats[vertices.length - 1];
-	lowy = lngs[0];
-	highy = lngs[vertices.length - 1];
-	center_x = lowx + ((highx-lowx) / 2);
-	center_y = lowy + ((highy - lowy) / 2);
-	return (new google.maps.LatLng(center_x, center_y));
-}
-
-/**
- * Jump to a specific Lat/Lon on the map object
- */
-function goToLatLon()
-{
-	var lat_val = parseFloat(document.getElementById("lat").value);
-	var lon_val = parseFloat(document.getElementById("lon").value);
-
-	var my_lat_lon = new google.maps.LatLng(lat_val, lon_val);
-
-	map.panTo(my_lat_lon);
-	map.setZoom(18);	
-
-	var marker = new google.maps.Marker({
-		position: my_lat_lon,
-		map: map
-	  });
-	
-	$.each( all_features, function( index, feature ) {
-		try
-		{
-			var geom = feature.getGeometry();
-			var poly = new google.maps.Polygon({
-				paths: geom.getAt(0).getArray(),
-			});
-
-			if ( google.maps.geometry.poly.containsLocation(my_lat_lon, poly) == true )
-			{
-				if ( document.getElementById("view-parcel-for-lat-lon").checked == true )
-				{
-					// Show the info
-					showFeature(feature);
-				}
-				else
-				{
-					// Just highlight the nearest parcel
-					map.data.revertStyle();
-					map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
-				}
-			}
-		}
-		catch(err)
-		{
-			console.error("Error with " + feature.getProperty('PARCEL_NUM'));
-			console.error(err);
-		}
-	});
-}
-
-/**
- * Go to user's current lat lon
- */
-function goToUserLatLon()
-{
-	if ( user_lat_lon == null ) return;
-
-	map.panTo(user_lat_lon);
-	map.setZoom(18);
 }
 
 function goToZone(zone_num)
