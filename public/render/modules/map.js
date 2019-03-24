@@ -28,14 +28,13 @@ function mapsScaleMilesHack()
 /**
  * Initialize the GeoLocation so the user can see where they are on the map
  */
-function initGeoCode()
+function initGeoCode(goTo)
 {
 	// GeoMarker stuff
-	locate();
-	function locate()
-	{
-        navigator.geolocation.getCurrentPosition(geoInit);
-    }
+	navigator.geolocation.getCurrentPosition((position) => {
+		geoInit(position);
+		if (goTo) goToUserLatLon();
+	});
 	
 	function geoInit(position)
 	{

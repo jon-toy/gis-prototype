@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-  <title>Apache County Rural Address Viewer</title>
+  <title>Apache County RA Fire Truck View</title>
 
   <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon.png">
@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous">
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="edit_history.css">
+  <link rel="stylesheet" href="fire_truck.css">
 
   <!-- Date Range Picker -->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -66,7 +66,7 @@
   </div>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/index.html" id="navbar-title">
-      Apache County Rural Address Viewer
+      Apache County RA Fire Truck View
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -93,9 +93,9 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="#">Select Zone</a>
-              <a class="dropdown-item" href="/rural_address.html?zone=south">South</a>
-              <a class="dropdown-item" href="/rural_address.html?zone=west">West</a>
-              <a class="dropdown-item" href="/rural_address.html?zone=concho">Concho (WIP)</a>
+              <a class="dropdown-item" href="/fire_truck.html?zone=south">South</a>
+              <a class="dropdown-item" href="/fire_truck.html?zone=west">West</a>
+              <a class="dropdown-item" href="/fire_truck.html?zone=concho">Concho (WIP)</a>
             </div>
           </li>
           <li class="nav-item">
@@ -416,11 +416,11 @@
     <script src="/render/modules/rural_address_search.js"></script>
   <!-- End Modules-->
 
-  <!-- Rural Address JS -->
-  <script src="/render/ruraladdress/ruraladdress_zone.js"></script>
+  <!-- Fire Truck JS -->
+  <script src="/render/ruraladdress/firetruck.js"></script>
   
   <!-- Google Maps -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initMetaData"
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initParcels"
   async defer></script>
   
   <!-- Recaptcha -->

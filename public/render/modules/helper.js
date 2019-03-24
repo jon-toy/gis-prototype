@@ -100,3 +100,72 @@ function renderModalProperty(container, title, content, css_classes)
 
     container.appendChild(row);
 }
+
+/**
+ * Store a compressed string into localStorage. Perform error handling too
+ */
+function localStorageSetItem(key, valueAsString) {
+	try {
+		// Take the string and compress it
+		var compressedString = LZString.compressToUTF16(valueAsString);
+
+		localStorage.setItem(key, compressedString);
+	}
+	catch (e) {
+		console.log(e);
+	}
+}
+
+
+// "Constants" for Local Storage Keys
+var LOCAL_STORAGE_KEY_META_DATA = "meta-data";
+var LOCAL_STORAGE_KEY_ZONE_FLAG = "zone";
+var LOCAL_STORAGE_KEY_MARKERS =  "markers";
+var LOCAL_STORAGE_KEY_PARCELS =  "parcels";
+var LOCAL_STORAGE_KEY_ROADS =  "roads";
+var LOCAL_STORAGE_KEY_TEXT =  "text";
+
+var load_from_local_storage = {
+	parcels: true,
+	markers: true,
+	roads: true,
+	text: true
+}
+
+/**
+ * Get an item from localStorage, uncompress and return as an Object. If not found, return null
+ * @param {*} key 
+ */
+function localStorageGetItemAsObject(key) {
+	try {
+		var obj = JSON.parse(localStorageGetItemAsString(key));
+		return obj;
+	}
+	catch (e) {
+		console.log(e);
+	}
+
+	return null;
+}
+
+/**
+ * Get an item from localStorage, uncompress and return as a String. If not found, return null
+ * @param {*} key 
+ */
+function localStorageGetItemAsString(key) {
+	var compressedString = null;
+	try {
+		compressedString = localStorage.getItem(key);
+
+		if (compressedString == null) return null;
+
+		// Uncompress the string
+		var uncompressedString = LZString.decompressFromUTF16(compressedString);
+		return uncompressedString;
+	}
+	catch (e) {
+		console.log(e);
+	}
+	 
+	return null;
+}
