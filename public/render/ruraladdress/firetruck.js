@@ -311,10 +311,6 @@ function showFeature(feature)
 			selectFeature(feature, data.situs);
 		});
 	}
-
-	document.getElementById("button-link-parcel-feedback").onclick = () => {
-		showParcelFeedbackModal(parcel);
-	}
 	
 	$("#parcelModal").modal("show");
 }
