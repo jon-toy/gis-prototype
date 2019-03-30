@@ -359,18 +359,18 @@ function initSearchModal(transportation_zone) {
 
 function doSearch() {
 
-	var value = document.getElementById("searchValue").value;
+	var value = document.getElementById("searchValue").value.toUpperCase();
 	var type = $("#searchBy option:selected").val();
 
 	var results = [];
 	
 	if (type === "situs") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.situs.indexOf(value) >= 0;
+			return parcel.situs.indexOf(value).toUpperCase() >= 0;
 		});
 	} else if ( type === "road") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.road.indexOf(value) >= 0;
+			return parcel.road.indexOf(value).toUpperCase() >= 0;
 		});
 	} else if ( type === "road_name") {
 		// Get a list of all road numbers that match this road name
@@ -392,7 +392,7 @@ function doSearch() {
 		});
 	} else if ( type === "owner") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.owner.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+			return parcel.owner.toUpperCase()().indexOf(value) >= 0;
 		});
 	} 
 	else {
