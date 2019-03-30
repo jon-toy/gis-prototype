@@ -376,7 +376,7 @@ function doSearch() {
 		// Get a list of all road numbers that match this road name
 		var roads = transportations.filter(road => {
 			var name = road.getProperty('ROAD_NAME');
-			return name != null && name.indexOf(value) >= 0;
+			return name != null && name.toUpperCase().indexOf(value) >= 0;
 		});
 
 		roads = roads.map(road => {
@@ -392,7 +392,7 @@ function doSearch() {
 		});
 	} else if ( type === "owner") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.owner.toUpperCase()().indexOf(value) >= 0;
+			return parcel.owner.toUpperCase().indexOf(value) >= 0;
 		});
 	} 
 	else {
