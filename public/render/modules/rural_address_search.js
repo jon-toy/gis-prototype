@@ -175,6 +175,8 @@ function renderSearchResults(results) {
 			var link_to_parcel = document.createElement("a");
 			link_to_parcel.innerHTML = "Go to Parcel";
 			link_to_parcel.setAttribute("href", "#");
+			link_to_parcel.setAttribute("data-toggle", "collapse");
+			link_to_parcel.setAttribute("data-target", "#navbarSupportedContent");
 
 			row.setAttribute("data-dismiss", "modal");
 			row.onclick = getParcelFromMapClosure(parcel.apn);

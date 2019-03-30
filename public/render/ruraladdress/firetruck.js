@@ -198,7 +198,7 @@ function initSpecific(api_host)
 			// Transporation
 			if ( transportations.indexOf(event.feature) >= 0 )
 			{
-				showSitusMarkers(event.feature.getProperty("NUMBER"));
+				//showSitusMarkers(event.feature.getProperty("NUMBER"));
 				return showTransportation(event.feature)
 			}
 
@@ -224,10 +224,29 @@ function initSpecific(api_host)
 				displayParcel(event.feature);
 			}
 
-			current_parcel_marker = labelFeature(event.feature.getProperty('PARCEL_NUM'), event.feature, true);
+			current_parcel_marker = labelFeature(event.feature.getProperty('situs'), event.feature, true);
 		});
 	}
 }
+
+/**
+ * Display the Transportation on the bottom bar
+ * @param {*} feature 
+ */
+function displayTransportation(feature) 
+{
+    document.getElementById("parcel-num-display").innerHTML = "Road: " + feature.getProperty('NUMBER');
+}
+
+// function showSitusMarkers(number) {
+// 	for ( var i = 0; i < marker_markers.length; i++ )
+// 	{
+// 		if ( marker_markers[i].getLabel().indexOf(number.toUpperCase()) >= 0 )
+// 			marker_markers[i].setMap(map);
+// 		else
+// 			marker_markers[i].setMap(null);
+// 	}
+// }
 
 /**
  * Get the feature/parcel from the map, given a parcel number
@@ -274,47 +293,22 @@ function showFeature(feature)
 	
 	// Feature properties that we need to get in advance
 	var parcel = feature.getProperty('PARCEL_NUM');
-	var account_number = feature.getProperty('NUMBER');
 	var owner = feature.getProperty('OWNER');
-	var size = feature.getProperty('SIZE');
-	if ( size ) size += " Ac."
-
-	var show_mid_bar = ( account_number && owner && size );
 
 	var info_box = document.getElementById('parcel_content');
 	info_box.innerHTML = "";
 
-	document.getElementById("parcelModalLabel").innerHTML = "Parcel " + parcel;
-
-	renderModalProperty(info_box, "Situs", feature.getProperty('SITUS'));
 	renderModalProperty(info_box, "CON", getCon(feature));
 	renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
-	if ( show_mid_bar == true ) renderModalProperty(info_box, "", "", "border-top my-3");
 	renderModalProperty(info_box, "Owner", owner);
-	renderModalProperty(info_box, "Account Information", account_number);
-	renderModalProperty(info_box, "Size", size);
 
 	// Edit History
 	{
 		$.getJSON(api_host + "/sheriff/edit-history/" + parcel, function (data)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
-			renderModalProperty(info_box, "Owner", data.owner);
-			renderModalProperty(info_box, "Remarks", data.remarks);
-
-			if ( data.edits.length > 0 )
-			{
-				var edit_history_html = "<table class=\"editHistory\"><tr><th>Description</th><th>Date</th></tr>";
-				for ( var i = 0; i < data.edits.length; i++ )
-				{
-					edit_history_html += "<tr>";
-					edit_history_html += "<td>" + data.edits[i].text + "</td>";
-					edit_history_html += "<td>" + data.edits[i].date + "</td>";
-					edit_history_html += "</tr>";
-				}
-				edit_history_html += "</table>";
-				renderModalProperty(info_box, "Edits", edit_history_html);
-			}
+			document.getElementById("parcelModalLabel").innerHTML = data.situs;
+			selectFeature(feature, data.situs);
 		});
 	}
 
@@ -323,6 +317,217 @@ function showFeature(feature)
 	}
 	
 	$("#parcelModal").modal("show");
+}
 
-	selectFeature(feature);
+var edit_history_search_set = [];
+
+/**
+ * Set up the Rural Address Search Modal
+ */
+function initSearchModal(transportation_zone) {
+
+	var uri = api_host + "/rural-addresses/edit-history/" + transportation_zone;
+
+	// Initial handler
+	$("#searchValue").on("input", () => {
+		doSearch();
+	});
+
+	$('#searchBy').on('change', function() {
+		// Reset the search value container
+		$("#searchValueLabel").html("Search Contains");
+		$("#searchValueContainer").html("<input class=\"form-control\" id=\"searchValue\"/>");
+
+		$("#searchValue").on("input", () => {
+			doSearch();
+		});
+
+		doSearch();
+	  });
+
+	$.getJSON(uri, function (data) 
+	{
+		if ( data.error_message )
+		{
+			console.log(data.error_message);
+			$("#select-mode-inner").show();
+			return;
+		}
+
+		edit_history_search_set = data;
+
+		// Populate initial
+		doSearch($("#searchBy").val(), $(".searchBy option:selected").val());
+	});
+}
+
+function doSearch() {
+
+	var value = document.getElementById("searchValue").value;
+	var type = $("#searchBy option:selected").val();
+
+	var results = [];
+	
+	if (type === "situs") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.situs.indexOf(value) >= 0;
+		});
+	} else if ( type === "road") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.road.indexOf(value) >= 0;
+		});
+	} else if ( type === "road_name") {
+		// Get a list of all road numbers that match this road name
+		var roads = transportations.filter(road => {
+			var name = road.getProperty('ROAD_NAME');
+			return name != null && name.indexOf(value) >= 0;
+		});
+
+		roads = roads.map(road => {
+			var roadNum = road.getProperty("NUMBER");
+			if (roadNum) roadNum = roadNum.toUpperCase();
+			return roadNum;
+		});
+
+		results = edit_history_search_set.filter(parcel => {
+			var parcelRoadUpper = parcel.road;
+			if (parcelRoadUpper) parcelRoadUpper = parcelRoadUpper.toUpperCase();
+			return roads.indexOf(parcelRoadUpper) >= 0;
+		});
+	} else if ( type === "owner") {
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.owner.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+		});
+	} 
+	else {
+		// Default to Situs
+		results = edit_history_search_set.filter(parcel => {
+			return parcel.situs.indexOf(value) >= 0;
+		});
+	}
+
+	renderSearchResults(results);
+}
+
+function renderSearchResults(results) {
+
+	$("#results_total").html(results.length);
+
+	search_result_sets = []; // Split the results up into an array of arrays
+	var arraySize = 20;
+	var i, j;
+	for (i = 0, j = results.length; i < j; i+= arraySize) {
+		var subset = results.splice(i, arraySize);
+		if (subset.length <= 0) break;
+		
+		search_result_sets.push(subset);
+	}
+
+	if (search_result_sets.length <= 0) search_result_sets.push([]);
+
+	current_search_pagination = 0;
+	renderTwentyResults(search_result_sets[current_search_pagination]); // Show the first subset by default
+
+	if (search_result_sets.length >= 1) {
+		renderSearchPagination();
+	}
+
+	function renderTwentyResults(resultssubset) {
+		var body = document.getElementById("resultsTableBody");
+		body.innerHTML = "";
+
+		for (var i = 0; i < resultssubset.length; i++) {
+			var parcel = resultssubset[i];
+			var row = document.createElement("tr");
+			row.className = "pointer";
+
+			// Go to Parcel
+			var cell = document.createElement("td");
+			var link_to_parcel = document.createElement("a");
+			link_to_parcel.innerHTML = "Go to Parcel";
+			link_to_parcel.setAttribute("href", "#");
+			link_to_parcel.setAttribute("data-toggle", "collapse");
+			link_to_parcel.setAttribute("data-target", "#navbarSupportedContent");
+
+			row.setAttribute("data-dismiss", "modal");
+			row.onclick = getParcelFromMapClosure(parcel.apn);
+
+			$(cell).append(link_to_parcel);
+			$(row).append(cell);
+
+			$(row).append("<td>" + parcel.situs + "</td>");
+			$(row).append("<td>" + parcel.owner + "</td>");
+
+			var roadName = getRoadNameFromNumber(parcel.road);
+			$(row).append("<td>" + parcel.road + "</td><td>" + (roadName ? roadName : "") + "</td>");
+
+			$(body).append(row);
+		};
+
+		function getParcelFromMapClosure(apn) {
+			return function() {
+				getParcelFromMap(apn);
+			}
+		}
+	}
+	
+	function renderSearchPagination() {
+		$("#search_previous").off();
+		$("#search_next").off();
+
+		if (current_search_pagination == 0) {
+			$("#search_previous").html("");
+		} 
+		else {
+			$("#search_previous").html("Previous 20");
+			
+			$("#search_previous").on("click", function() {
+				current_search_pagination--;
+				renderTwentyResults(search_result_sets[current_search_pagination]);
+				renderSearchPagination();
+			});
+		}
+
+		if (current_search_pagination == search_result_sets.length - 1) {
+			$("#search_next").html("");
+		}
+		else {
+			$("#search_next").html("Next 20");
+			$("#search_next").on("click", function() {
+				current_search_pagination++;
+				renderTwentyResults(search_result_sets[current_search_pagination]);
+				renderSearchPagination();
+			});
+		}
+	}
+}
+
+/**
+ * Update last modified date in footer from data API
+ */
+function initLastModified() {
+	var uri = api_host + "/rural-addresses/edit-history/";
+
+	$.getJSON(uri, function (data) 
+	{
+		var text = document.getElementById("editHistoryLastUpdated");
+
+		var zone = data.zones.find(zone => zone.name == transportation_zone);
+
+		if (zone) {
+			var date = new Date(zone.lastModified);
+			text.innerHTML = "Last Modified: " + (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+		}
+	});
+}
+
+function getRoadNameFromNumber(roadNumber) {
+	var roadNumberUpper = roadNumber.toUpperCase();
+	var road =  transportations.find(road => {
+		var loopRoad = road.getProperty("NUMBER");
+		if (loopRoad) loopRoad = loopRoad.toUpperCase();
+		return roadNumberUpper == loopRoad;
+	});
+
+	return (road ? road.getProperty("ROAD_NAME") : null);
 }
