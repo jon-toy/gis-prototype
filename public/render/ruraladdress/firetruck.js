@@ -366,11 +366,11 @@ function doSearch() {
 	
 	if (type === "situs") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.situs.indexOf(value).toUpperCase() >= 0;
+			return parcel.situs.toUpperCase().indexOf(value) >= 0;
 		});
 	} else if ( type === "road") {
 		results = edit_history_search_set.filter(parcel => {
-			return parcel.road.indexOf(value).toUpperCase() >= 0;
+			return parcel.road.toUpperCase().indexOf(value) >= 0;
 		});
 	} else if ( type === "road_name") {
 		// Get a list of all road numbers that match this road name
