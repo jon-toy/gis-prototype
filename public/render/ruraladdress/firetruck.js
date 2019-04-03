@@ -117,23 +117,14 @@ function initSpecific(api_host)
 {
     loadingFadeIn();
 
-	// Load Roads
-	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_ROADS);
-	if (load_from_local_storage && load_from_local_storage.roads == true && data != null) {
-		// Local Storage
-		console.log("Loaded from localStorage: Roads");
+	// Get from API
+	$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
+	{
+		// Store in local storage
+		localStorageSetItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
+		
 		continueLoadingRoads(data);
-	}
-	else {
-		// Get from API
-		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
-		{
-			// Store in local storage
-			localStorageSetItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
-			
-			continueLoadingRoads(data);
-		});
-	}
+	});
 
 	function continueLoadingRoads(data) {
 		transportations = map.data.addGeoJson(data);
