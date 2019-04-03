@@ -14,6 +14,8 @@ var transportation_zones_starting_points = [
 	{ lat: 34.5180075, lon: -109.69512700000001 }
 ];
 
+var transportations;
+
 // Only show valid zones
 var trans_zone_index = valid_transportation_zones.indexOf(transportation_zone);
 if ( trans_zone_index < 0) {
@@ -119,10 +121,7 @@ function initSpecific(api_host)
 
 	// Get from API
 	$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/roads.json", function (data) 
-	{
-		// Store in local storage
-		localStorageSetItem(LOCAL_STORAGE_KEY_ROADS, JSON.stringify(data));
-		
+	{	
 		continueLoadingRoads(data);
 	});
 
