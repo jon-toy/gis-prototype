@@ -14,7 +14,7 @@ var transportation_zones_starting_points = [
 	{ lat: 34.5180075, lon: -109.69512700000001 }
 ];
 
-var transportations;
+var transportations = [];
 
 // Only show valid zones
 var trans_zone_index = valid_transportation_zones.indexOf(transportation_zone);
