@@ -29,6 +29,15 @@ function displayParcel(feature)
 }
 
 /**
+ * Display the Owner on the bottom bar
+ * @param {*} feature 
+ */
+function displayOwner(feature) 
+{
+	document.getElementById("parcel-num-display").innerHTML = "Owner: " + feature.getProperty('OWNER');
+}
+
+/**
  * Turn on the loading screen
  */
 function loadingFadeOut(speed)

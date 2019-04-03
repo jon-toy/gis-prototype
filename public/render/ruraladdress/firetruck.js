@@ -57,7 +57,7 @@ function initParcels(starting_lat_lon)
 		var color = '#28a745';
 		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
 		displayCoordinates(event.latLng);
-		displayParcel(event.feature);
+		displayOwner(event.feature);
 
 		current_parcel_marker = labelFeature(event.feature.getProperty('PARCEL_NUM'), event.feature, true);
 	});
@@ -211,7 +211,7 @@ function initSpecific(api_host)
 			}
 			else
 			{
-				displayParcel(event.feature);
+				displayOwner(event.feature);
 			}
 
 			current_parcel_marker = labelFeature(event.feature.getProperty('situs'), event.feature, true);
