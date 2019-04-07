@@ -80,7 +80,7 @@ function labelFeature(label_text, feature, ignore_zoom_restriction, manual_lat_l
  * Change the style of the feature that is selected, and pan to it
  * @param {*} selected_feature 
  */
-function selectFeature(selected_feature, label)
+function selectFeature(selected_feature, label, doCenter)
 {
 	// Style and color the selected feature
 	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
@@ -90,12 +90,14 @@ function selectFeature(selected_feature, label)
 	else
 		labelFeature(selected_feature.getProperty('PARCEL_NUM'), selected_feature);
 
-	var geom = selected_feature.getGeometry();
-	var poly = new google.maps.Polygon({
-		paths: geom.getAt(0).getArray(),
-	});
-	var center = getPolygonCenter(poly);
-	map.panTo(center);
+	if (doCenter == true) {
+		var geom = selected_feature.getGeometry();
+		var poly = new google.maps.Polygon({
+			paths: geom.getAt(0).getArray(),
+		});
+		var center = getPolygonCenter(poly);
+		map.panTo(center);
+	}
 
 	selected_feature.setProperty('selected', true);
 }

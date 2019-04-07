@@ -423,7 +423,11 @@ function showFeature(feature)
 	document.getElementById("button-link-parcel-feedback").onclick = () => {
 		showParcelFeedbackModal(parcel);
 	}
-	
+
+	document.getElementById("button-link-fire-truck-dispatch").onclick = () => {
+		showFireTruckDispatchModal(parcel);
+	}
+
 	$("#parcelModal").modal("show");
 
 	selectFeature(feature);
@@ -666,6 +670,32 @@ function showParcelFeedbackModal(apn) {
 		
 		$.post( "/rural-address/send-feedback", body, function( data ) {
 			$("#parcelFeedbackModal").modal("hide");
+		  });
+	});
+}
+
+function showFireTruckDispatchModal(apn) {	
+	$("#fireTruckDispatchModal").modal("show");
+
+	// Remove other handlers from previous modal opens
+	$("#fire-truck-dispatch-button").off();
+
+	$("#fire-truck-dispatch-button").click((e) => {
+		e.preventDefault();
+		// Combine parcel JSON with form data and post as request body (AJAX)
+		var body = {};
+		body.recipients = [];
+		body.apn = apn;
+
+		$("input:checkbox[name=fire-truck-dispatch-choices]:checked").each(function(){
+			body.recipients.push($(this).val());
+		});
+		console.log(body.recipients);
+
+		if (body.recipients.length <= 0) return;
+		
+		$.post( "/rural-address/fire-truck-dispatch", body, function() {
+			$("#fireTruckDispatchModal").modal("hide");
 		  });
 	});
 }

@@ -25,6 +25,8 @@ if ( trans_zone_index < 0) {
 
 var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_index];
 var user_lat_lon;
+var viewedFeature;
+var bounds;
 
 $(document).ready(function() {
 	initFeedback();
@@ -34,8 +36,19 @@ $(document).ready(function() {
 	initLastModified();
 });
 
+function initParcelParam()
+{
+	// Get the parcel
+	var parcel_num_param = getUrlParam("parcel");
+	if ( parcel_num_param == null ) return;
+
+	$("#select-mode-inner").hide();
+	getParcelFromMap(parcel_num_param, false);
+}
+
 function initParcels(starting_lat_lon)
 {
+	bounds = new google.maps.LatLngBounds();
 	loadingFadeIn();
 
 	// Create the Map object
@@ -106,7 +119,8 @@ function initParcels(starting_lat_lon)
 	initSpecific(api_host);
 
 	mapsScaleMilesHack();
-    initGeoCode(true);
+	initFireTruckGeoCode();
+	initParcelParam();
 
     loadingFadeOut();
 }
@@ -228,21 +242,11 @@ function displayTransportation(feature)
     document.getElementById("parcel-num-display").innerHTML = "Road: " + feature.getProperty('NUMBER');
 }
 
-// function showSitusMarkers(number) {
-// 	for ( var i = 0; i < marker_markers.length; i++ )
-// 	{
-// 		if ( marker_markers[i].getLabel().indexOf(number.toUpperCase()) >= 0 )
-// 			marker_markers[i].setMap(map);
-// 		else
-// 			marker_markers[i].setMap(null);
-// 	}
-// }
-
 /**
  * Get the feature/parcel from the map, given a parcel number
  * @param {} parcel_num 
  */
-function getParcelFromMap(parcel_num)
+function getParcelFromMap(parcel_num, doCenter)
 {
 	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
 	if ( parcel_num == null || parcel_num.length <= 0 ) return;
@@ -263,10 +267,22 @@ function getParcelFromMap(parcel_num)
          // Show it
         $("#select-mode-inner").hide();
 
-        showFeature(feature[0]);
+		showFeature(feature[0], doCenter);
+		viewedFeature = feature[0];
+
+		var geom = viewedFeature.getGeometry();
+		var poly = new google.maps.Polygon({
+			paths: geom.getAt(0).getArray(),
+		});
+
+		var lat_lon = getPolygonCenter(poly);
+		bounds.extend(lat_lon);
+		map.fitBounds(bounds);
+		map.setCenter(bounds.getCenter());
+
         
         // Zoom in
-        map.setZoom(15);
+        //map.setZoom(15);
         return;
     });
 }
@@ -276,8 +292,9 @@ function getParcelFromMap(parcel_num)
  * and show it.
  * @param {*} feature 
  */
-function showFeature(feature)
+function showFeature(feature, doCenter)
 {	  
+	if (doCenter == null) doCenter = true;
 	map.data.revertStyle();
 	map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'blue', strokeColor:'blue'});
 	
@@ -298,7 +315,7 @@ function showFeature(feature)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			document.getElementById("parcelModalLabel").innerHTML = data.situs;
-			selectFeature(feature, data.situs);
+			selectFeature(feature, data.situs, doCenter);
 		});
 	}
 	
@@ -516,4 +533,33 @@ function getRoadNameFromNumber(roadNumber) {
 	});
 
 	return (road ? road.getProperty("ROAD_NAME") : null);
+}
+
+/**
+ * Initialize the GeoLocation so the user can see where they are on the map. 
+ * Then, given a parcel, zoom out to show both
+ */
+function initFireTruckGeoCode(feature)
+{
+	// GeoMarker stuff
+	navigator.geolocation.getCurrentPosition((position) => {
+		geoInit(position);
+		goToUserLatLon();
+	});
+	
+	function geoInit(position)
+	{
+		user_lat_lon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+		
+		 var userMarker = new google.maps.Marker({
+				position: user_lat_lon,
+				map: map,
+				icon: "/geolocation-icon.png"
+			});
+		
+		// Extend view to fit user
+		bounds.extend(userMarker.getPosition());
+		map.fitBounds(bounds);
+		map.setCenter(bounds.getCenter());
+	}
 }

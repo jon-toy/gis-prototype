@@ -125,6 +125,74 @@ app.post('/rural-address/send-feedback', (req, res) => {
 	}
 });
 
+app.post('/rural-address/fire-truck-dispatch', (req, res) => {
+	var apn = req.body['apn'];
+	var recipients = req.body['recipients[]'];
+
+	if ( recipients === null || apn === null ) 
+	{
+		return res.json({"success" : false, "message": "Missing apn or recipients"});
+	}
+	else
+	{
+		// Send the email
+		var transporter = nodemailer.createTransport({
+			service: 'gmail',
+			auth: {
+				user: 'apachecountyfeedback@gmail.com',
+				pass: 'eggdrop1315'
+			}
+		});
+
+		var link = "https://jt.co.apache.az.us/fire_truck.html?parcel=" + apn;
+
+		// Assemble Text
+		var emailHtml = 
+		"Hello,<br>" +
+		"The <a href=\"https://jt.co.apache.az.us/rural_address.html\">Apache County Rural Address App</a> " + 
+		"has sent you a Fire Truck Link: <br><br>" +
+		"<a href=\"" + link + "\">Fire Truck Link</a><br>" +
+		"<a href=\"" + link + "\">" + link + "</a><br>";
+
+		// Assemble recipients
+		var emailRecipients = '';
+
+		if (Array.isArray(recipients)) {
+			for (var i = 0; i < recipients.length; i++) {
+				if (recipients[i] === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
+				else if (recipients[i] === 'alpine') emailRecipients += 'z.vanslyke.alpine@frontier.com, ';
+				else if (recipients[i] === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
+				else if (recipients[i] === 'vernon') emailRecipients += 'chief@vfd.org, ';
+				else if (recipients[i] === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
+			}
+		}
+		else {
+				if (recipients === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
+				else if (recipients === 'alpine') emailRecipients += 'z.vanslyke.alpine@frontier.com, ';
+				else if (recipients === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
+				else if (recipients === 'vernon') emailRecipients += 'chief@vfd.org, ';
+				else if (recipients === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
+		}
+		
+		
+		var mailOptions = {
+			from: 'apachecountyfeedback@gmail.com',
+			to: emailRecipients,
+			subject: 'Fire Truck Dispatch Link',
+			html: emailHtml
+		};
+		
+		transporter.sendMail(mailOptions, function(error, info){
+			if (error) {
+				console.log(error);
+			} else {
+				console.log('Email sent: ' + info.response);
+			}
+		});
+		return res.json({"success" : true});
+	}
+});
+
 app.post('/submit-feedback',function(req,res) {
   // g-recaptcha-response is the key that browser will generate upon form submit.
   // if its blank or null means user has not selected the captcha, so return the error.
