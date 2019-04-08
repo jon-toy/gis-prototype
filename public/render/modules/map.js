@@ -82,6 +82,8 @@ function labelFeature(label_text, feature, ignore_zoom_restriction, manual_lat_l
  */
 function selectFeature(selected_feature, label, doCenter)
 {
+	if (doCenter == null) doCenter = true;
+
 	// Style and color the selected feature
 	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
 
@@ -90,7 +92,7 @@ function selectFeature(selected_feature, label, doCenter)
 	else
 		labelFeature(selected_feature.getProperty('PARCEL_NUM'), selected_feature);
 
-	if (doCenter == true) {
+	if (doCenter === true) {
 		var geom = selected_feature.getGeometry();
 		var poly = new google.maps.Polygon({
 			paths: geom.getAt(0).getArray(),
