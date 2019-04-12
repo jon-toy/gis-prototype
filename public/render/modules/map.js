@@ -88,7 +88,7 @@ function selectFeature(selected_feature, label, doCenter)
 	map.data.overrideStyle(selected_feature, {strokeWeight: 8, fillColor:'green', strokeColor:'green'});
 
 	if (label)
-	labelFeature(label, selected_feature);
+		labelFeature(label, selected_feature, true);
 	else
 		labelFeature(selected_feature.getProperty('PARCEL_NUM'), selected_feature);
 

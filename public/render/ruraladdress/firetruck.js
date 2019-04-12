@@ -27,6 +27,7 @@ var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_
 var user_lat_lon;
 var viewedFeature;
 var bounds;
+var marker_markers = [];
 
 $(document).ready(function() {
 	initFeedback();
@@ -104,12 +105,12 @@ function initParcels(starting_lat_lon)
 		if ( map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD )
 		{
 			// Wipe markers
-			for ( var i = 0; i < parcel_num_markers.length; i++ )
-			{
-				parcel_num_markers[i].setMap(null);
-			}
+			// for ( var i = 0; i < parcel_num_markers.length; i++ )
+			// {
+			// 	parcel_num_markers[i].setMap(null);
+			// }
 
-			parcel_num_markers = [];
+			// parcel_num_markers = [];
 		}
 	});
 
@@ -120,7 +121,70 @@ function initParcels(starting_lat_lon)
 
 	mapsScaleMilesHack();
 	initFireTruckGeoCode();
-	initParcelParam();
+
+	// Load Markers
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
+	if (load_from_local_storage.markers == true && data != null) {
+		// Local Storage
+		console.log("Loaded from localStorage: Markers");
+		continueLoadingMarkers(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
+		{
+			// Store in local storage
+			localStorageSetItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
+
+			continueLoadingMarkers(data);
+		});
+	}
+
+	function continueLoadingMarkers(data) {
+		markers = map.data.addGeoJson(data);
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setProperty("marker", true);
+		}
+	}
+	
+	// Load Text
+	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
+	if (load_from_local_storage.text == true && data != null) {
+		// Local Storage
+		console.log("Loaded from localStorage: Text");
+		continueLoadingText(data);
+	}
+	else {
+		// Get from API
+		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
+		{
+			// Store in local storage
+			localStorageSetItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
+	
+			continueLoadingText(data);
+		});
+	}
+
+	function continueLoadingText(data) {
+		var buffer = new google.maps.Data();
+		text = buffer.addGeoJson(data);
+
+		for ( var i = 0; i < text.length; i++ )
+		{	
+			// Create a label
+			var marker = new google.maps.Marker({
+				position: text[i].getGeometry().get(),
+				label: text[i].getProperty("TEXTSTRING"),
+				map: null,
+				icon: {
+					path: google.maps.SymbolPath.CIRCLE,
+					scale: 0
+				}
+			});
+
+			marker_markers.push(marker);
+		}
+	}
 
     loadingFadeOut();
 }
@@ -161,7 +225,7 @@ function initSpecific(api_host)
 				return ({
 					strokeColor: "#FF0000",
 					strokeOpacity: 0.8,
-					strokeWeight: 0,  // Hide roads for now
+					strokeWeight: 3,  // Hide roads for now
 					zIndex: 5
 				});
 			}
@@ -202,7 +266,7 @@ function initSpecific(api_host)
 			// Transporation
 			if ( transportations.indexOf(event.feature) >= 0 )
 			{
-				//showSitusMarkers(event.feature.getProperty("NUMBER"));
+				showSitusMarkers(event.feature.getProperty("NUMBER"));
 				return showTransportation(event.feature)
 			}
 
@@ -243,10 +307,66 @@ function displayTransportation(feature)
 }
 
 /**
+ * Parse out properties from the transportation feature, place those properties into the Transportation Modal,
+ * and show it.
+ * @param {*} feature 
+ */
+function showTransportation(feature)
+{	  
+	map.data.revertStyle();
+    map.data.overrideStyle(feature, {strokeWeight: 8, fillColor:'blue', strokeColor:'blue'});
+
+    var info_box = document.getElementById('transportation_content');
+	info_box.innerHTML = "";
+
+	document.getElementById("transportationModalLabel").innerHTML = "Road " + feature.getProperty("NUMBER");
+
+    renderModalProperty(info_box, "Number 0", feature.getProperty('NUMBER0'));
+    renderModalProperty(info_box, "Road Name", feature.getProperty('ROAD_NAME'));
+    renderModalProperty(info_box, "Number 1", feature.getProperty('NUMBER1'));
+	
+	$("#transportationModal").modal("show");
+
+    selectFeature(feature);
+    
+    function renderModalProperty(container, title, content, css_classes)
+	{
+		if ( content == null ) return;
+
+		var row = document.createElement('div');
+		row.className = "row p-2";
+
+		var title_container = document.createElement('div');
+		title_container.className = 'col-3';
+		title_container.innerHTML = '<b>' + title + '</b>';
+		row.appendChild(title_container);
+
+		var content_container = document.createElement('div');
+		content_container.className = 'col-9';
+		content_container.innerHTML = content;
+		row.appendChild(content_container);
+
+		if ( css_classes ) row.className = css_classes;
+
+		container.appendChild(row);
+	}
+}
+
+function showSitusMarkers(number) {
+	for ( var i = 0; i < marker_markers.length; i++ )
+	{
+		if ( marker_markers[i].getLabel().indexOf(number.toUpperCase()) >= 0 )
+			marker_markers[i].setMap(map);
+		else
+			marker_markers[i].setMap(null);
+	}
+}
+
+/**
  * Get the feature/parcel from the map, given a parcel number
  * @param {} parcel_num 
  */
-function getParcelFromMap(parcel_num, doCenter)
+function getParcelFromMap(parcel_num, doCenter, doZoom)
 {
 	if ( parcel_num == null ) parcel_num = document.getElementById("search-by-parcel-number").value;
 	if ( parcel_num == null || parcel_num.length <= 0 ) return;
@@ -282,7 +402,7 @@ function getParcelFromMap(parcel_num, doCenter)
 
         
         // Zoom in
-        //map.setZoom(15);
+        if (doZoom === true) map.setZoom(15);
         return;
     });
 }
@@ -315,11 +435,26 @@ function showFeature(feature, doCenter)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			document.getElementById("parcelModalLabel").innerHTML = data.situs;
-			selectFeature(feature, data.situs, doCenter);
+
+			// Calculate distance from user lat lon to center
+			var geom = viewedFeature.getGeometry();
+			var poly = new google.maps.Polygon({
+				paths: geom.getAt(0).getArray(),
+			});
+			var feature_lat_lon = getPolygonCenter(poly);
+			selectFeature(feature, getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)), doCenter);
 		});
+	}
+
+	document.getElementById("button-link-fire-truck-dispatch").onclick = () => {
+		showFireTruckDispatchModal(parcel);
 	}
 	
 	$("#parcelModal").modal("show");
+}
+
+function getMiles(i) {
+	return (Math.round(10*i*0.000621371192)/10) + " Miles";
 }
 
 var edit_history_search_set = [];
@@ -469,7 +604,7 @@ function renderSearchResults(results) {
 
 		function getParcelFromMapClosure(apn) {
 			return function() {
-				getParcelFromMap(apn);
+				getParcelFromMap(apn, true, true);
 			}
 		}
 	}
@@ -545,6 +680,7 @@ function initFireTruckGeoCode(feature)
 	navigator.geolocation.getCurrentPosition((position) => {
 		geoInit(position);
 		goToUserLatLon();
+		initParcelParam();
 	});
 	
 	function geoInit(position)
@@ -562,4 +698,30 @@ function initFireTruckGeoCode(feature)
 		map.fitBounds(bounds);
 		map.setCenter(bounds.getCenter());
 	}
+}
+
+function showFireTruckDispatchModal(apn) {	
+	$("#fireTruckDispatchModal").modal("show");
+
+	// Remove other handlers from previous modal opens
+	$("#fire-truck-dispatch-button").off();
+
+	$("#fire-truck-dispatch-button").click((e) => {
+		e.preventDefault();
+		// Combine parcel JSON with form data and post as request body (AJAX)
+		var body = {};
+		body.recipients = [];
+		body.apn = apn;
+
+		$("input:checkbox[name=fire-truck-dispatch-choices]:checked").each(function(){
+			body.recipients.push($(this).val());
+		});
+		console.log(body.recipients);
+
+		if (body.recipients.length <= 0) return;
+		
+		$.post( "/rural-address/fire-truck-dispatch", body, function() {
+			$("#fireTruckDispatchModal").modal("hide");
+		  });
+	});
 }

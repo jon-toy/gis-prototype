@@ -136,6 +136,7 @@
     <div id="parcel_content"></div>
     </div>
         <div class="modal-footer">
+          <a href="#" id="button-link-fire-truck-dispatch" class="btn btn-outline-danger">Send Link</a>
           <button class="btn btn-primary" type="button" data-dismiss="modal">Done</button>
         </div>
       </div>
@@ -370,6 +371,59 @@
       </div>
     </div>
   </div>
+
+   <!-- Rural Address Fire Truck Dispatch Feedback Modal -->
+	<div class="modal fade" id="fireTruckDispatchModal" tabindex="-1" role="dialog" aria-labelledby="fireTruckDispatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fireTruckDispatchModalLabel">Send to Fire Truck</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fa fa-times"></i></span>
+          </button>
+        </div>
+        <form role="form" id="fire-truck-dispatch-form">
+          <div class="modal-body">
+            <label class="control-label">Select recipient(s) for an email notification to a <b>Fire Department</b> regarding this Parcel.</label>
+            <div class="form-check">
+              <input class="form-check-input fire-truck-dispatch-choices" name="fire-truck-dispatch-choices" type="checkbox" value="dispatch" id="fire-truck-dispatch-choices-dispatch">
+              <label class="form-check-label" for="fire-truck-dispatch-choices-dispatch">
+                Apache County Dispatch
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input fire-truck-dispatch-choices" name="fire-truck-dispatch-choices" type="checkbox" value="alpine" id="fire-truck-dispatch-choices-alpine">
+              <label class="form-check-label" for="fire-truck-dispatch-choices-alpine">
+                Alpine Fire Department
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input fire-truck-dispatch-choices" name="fire-truck-dispatch-choices" type="checkbox" value="eagar" id="fire-truck-dispatch-choices-eagar">
+              <label class="form-check-label" for="fire-truck-dispatch-choices-eagar">
+                Eagar Fire Department
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input fire-truck-dispatch-choices" name="fire-truck-dispatch-choices" type="checkbox" value="vernon" id="fire-truck-dispatch-choices-vernon">
+              <label class="form-check-label" for="fire-truck-dispatch-choices-vernon">
+                Vernon Fire Department
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input fire-truck-dispatch-choices" name="fire-truck-dispatch-choices" type="checkbox" value="dev" id="fire-truck-dispatch-choices-development">
+              <label class="form-check-label" for="fire-truck-dispatch-choices-development">
+                [TEST] Development
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="fire-truck-dispatch-button">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 </body>	
 	<!-- JQuery -->
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
