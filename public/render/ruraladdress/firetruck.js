@@ -426,7 +426,9 @@ function showFeature(feature, doCenter)
 	info_box.innerHTML = "";
 
 	renderModalProperty(info_box, "CON", getCon(feature));
-	renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
+
+	var fire_district = getFireDistrict(feature);
+	renderModalProperty(info_box, "Fire District", fire_district);
 	renderModalProperty(info_box, "Owner", owner);
 
 	// Edit History
@@ -447,7 +449,7 @@ function showFeature(feature, doCenter)
 	}
 
 	document.getElementById("button-link-fire-truck-dispatch").onclick = () => {
-		showFireTruckDispatchModal(parcel);
+		showFireTruckDispatchModal(parcel, fire_district);
 	}
 	
 	$("#parcelModal").modal("show");
@@ -700,11 +702,22 @@ function initFireTruckGeoCode(feature)
 	}
 }
 
-function showFireTruckDispatchModal(apn) {	
+function showFireTruckDispatchModal(apn, fire_district) {	
 	$("#fireTruckDispatchModal").modal("show");
 
 	// Remove other handlers from previous modal opens
 	$("#fire-truck-dispatch-button").off();
+
+	$('.fire-truck-dispatch-choices').prop('checked', false); // Uncheck all boxes
+	
+	// Find a default box to check
+	if (fire_district === 'Alpine') {
+		$('#fire-truck-dispatch-choices-alpine').prop('checked', true);
+	} else if (fire_district === 'Eagar') {
+		$('#fire-truck-dispatch-choices-eagar').prop('checked', true);
+	} else if (fire_district === 'Vernon') {
+		$('#fire-truck-dispatch-choices-vernon').prop('checked', true);
+	}
 
 	$("#fire-truck-dispatch-button").click((e) => {
 		e.preventDefault();
