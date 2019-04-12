@@ -149,7 +149,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 		// Assemble Text
 		var emailHtml = 
 		"Hello,<br>" +
-		"The <a href=\"https://jt.co.apache.az.us/rural_address.html\">Apache County Rural Address App</a> " + 
+		"The Apache County Rural Address App " + 
 		"has sent you a Fire Truck Link: <br><br>" +
 		"<a href=\"" + link + "\">Fire Truck Link</a><br>" +
 		"<a href=\"" + link + "\">" + link + "</a><br>";
