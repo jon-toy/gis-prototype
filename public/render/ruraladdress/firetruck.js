@@ -24,9 +24,10 @@ if ( trans_zone_index < 0) {
 }
 
 var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_index];
-var user_lat_lon;
+var user_lat_lon, user_marker;
 var viewedFeature;
 var bounds;
+var markers = [];
 var marker_markers = [];
 
 $(document).ready(function() {
@@ -181,7 +182,7 @@ function initParcels(starting_lat_lon)
 					scale: 0
 				}
 			});
-
+			markers.push(text[i]);
 			marker_markers.push(marker);
 		}
 	}
@@ -283,7 +284,7 @@ function initSpecific(api_host)
 			{
 				displayTransportation(event.feature);
 			}
-			else if ( transportations.indexOf(event.feature) >= 0 )
+			else if ( markers.indexOf(event.feature) >= 0 )
 			{
 				displayMarker(event.feature);
 			}
@@ -444,7 +445,7 @@ function showFeature(feature, doCenter)
 				paths: geom.getAt(0).getArray(),
 			});
 			var feature_lat_lon = getPolygonCenter(poly);
-			selectFeature(feature, getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)), doCenter);
+			selectFeature(feature, "OWNER: " + owner + " DISTANCE: " + getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)), doCenter);
 		});
 	}
 
@@ -689,14 +690,21 @@ function initFireTruckGeoCode(feature)
 	{
 		user_lat_lon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 		
-		 var userMarker = new google.maps.Marker({
+		user_marker = new google.maps.Marker({
 				position: user_lat_lon,
 				map: map,
 				icon: "/geolocation-icon.png"
 			});
 		
+			setInterval(function() {
+				navigator.geolocation.getCurrentPosition((position) => {
+					user_lat_lon = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+					user_marker.setPosition(user_lat_lon);
+				});
+			  }, 3000);
+		
 		// Extend view to fit user
-		bounds.extend(userMarker.getPosition());
+		bounds.extend(user_marker.getPosition());
 		map.fitBounds(bounds);
 		map.setCenter(bounds.getCenter());
 	}

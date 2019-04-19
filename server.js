@@ -160,7 +160,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 		if (Array.isArray(recipients)) {
 			for (var i = 0; i < recipients.length; i++) {
 				if (recipients[i] === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
-				else if (recipients[i] === 'alpine') emailRecipients += 'z.vanslyke.alpine@frontier.com, ';
+				else if (recipients[i] === 'alpine') emailRecipients += 'z.vanslyke.alpinefire@frontier.com, ';
 				else if (recipients[i] === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
 				else if (recipients[i] === 'vernon') emailRecipients += 'chief@vfd.org, ';
 				else if (recipients[i] === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';

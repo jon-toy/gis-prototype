@@ -542,7 +542,7 @@ function initSpecific(api_host)
 			{
 				displayTransportation(event.feature);
 			}
-			else if ( transportations.indexOf(event.feature) >= 0 )
+			else if ( markers.indexOf(event.feature) >= 0 )
 			{
 				displayMarker(event.feature);
 			}

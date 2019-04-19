@@ -49,6 +49,15 @@ function displayOwner(feature)
 }
 
 /**
+ * Display the Marker on the bottom bar
+ * @param {*} feature 
+ */
+function displayMarker(feature) 
+{
+	document.getElementById("parcel-num-display").innerHTML = "Address: " + feature.getProperty('NUMBER1') + " " + feature.getProperty('NUMBER0');
+}
+
+/**
  * Turn on the loading screen
  */
 function loadingFadeOut(speed)
