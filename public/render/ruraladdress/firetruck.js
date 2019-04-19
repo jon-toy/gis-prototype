@@ -72,7 +72,7 @@ function initParcels(starting_lat_lon)
 		var color = '#28a745';
 		map.data.overrideStyle(event.feature, {strokeWeight: 8, fillColor:color, strokeColor:color});
 		displayCoordinates(event.latLng);
-		displayOwner(event.feature);
+		displayOwnerAndDistance(event.feature);
 
 		current_parcel_marker = labelFeature(event.feature.getProperty('PARCEL_NUM'), event.feature, true);
 	});
@@ -190,6 +190,16 @@ function initParcels(starting_lat_lon)
     loadingFadeOut();
 }
 
+function displayOwnerAndDistance(feature) {
+	// Calculate distance from user lat lon to center
+	var geom = feature.getGeometry();
+	var poly = new google.maps.Polygon({
+		paths: geom.getAt(0).getArray(),
+	});
+	var feature_lat_lon = getPolygonCenter(poly);
+	document.getElementById("parcel-num-display").innerHTML = "OWNER: " + feature.getProperty('OWNER') + " DISTANCE: " + getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon))
+}
+
 /**
  * Page-specific JS, called after parcel load. Load the transportation lines.
  * @param {*} api_host 
@@ -290,7 +300,7 @@ function initSpecific(api_host)
 			}
 			else
 			{
-				displayOwner(event.feature);
+				displayOwnerAndDistance(event.feature);
 			}
 
 			current_parcel_marker = labelFeature(event.feature.getProperty('situs'), event.feature, true);
@@ -432,20 +442,21 @@ function showFeature(feature, doCenter)
 	renderModalProperty(info_box, "Fire District", fire_district);
 	renderModalProperty(info_box, "Owner", owner);
 
+	// Calculate distance from user lat lon to center
+	var geom = feature.getGeometry();
+	var poly = new google.maps.Polygon({
+		paths: geom.getAt(0).getArray(),
+	});
+	var feature_lat_lon = getPolygonCenter(poly);
+	renderModalProperty(info_box, "Distance", getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)))
+
 	// Edit History
 	{
 		$.getJSON(api_host + "/sheriff/edit-history/" + parcel, function (data)
 		{
 			renderModalProperty(info_box, "Situs", data.situs);
 			document.getElementById("parcelModalLabel").innerHTML = data.situs;
-
-			// Calculate distance from user lat lon to center
-			var geom = viewedFeature.getGeometry();
-			var poly = new google.maps.Polygon({
-				paths: geom.getAt(0).getArray(),
-			});
-			var feature_lat_lon = getPolygonCenter(poly);
-			selectFeature(feature, "OWNER: " + owner + " DISTANCE: " + getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)), doCenter);
+			selectFeature(feature, data.situs, doCenter);
 		});
 	}
 
