@@ -58,8 +58,20 @@ function searchByParcelNumLoadZone(parcel_num, skip_confirm)
 
 		// Get the center point
 		var parcel_geom = feature.getGeometry();
+
+		// Get the array paths (if applicable)
+		var paths = [];
+		try {
+			paths = parcel_geom.getAt(0).getArray();
+		}
+		catch(e) {
+			console.log(e);
+			paths = [];
+			paths.push(parcel_geom.getAt(0))
+		}
+
 		var parcel_poly = new google.maps.Polygon({
-			paths: parcel_geom.getAt(0).getArray(),
+			paths: paths,
 		});
 		var starting_lat_lon = getPolygonCenter(parcel_poly);
 
