@@ -153,6 +153,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 		"Hello,<br>" +
 		"The Apache County Rural Address App " + 
 		"has sent you a Fire Truck Link: <br><br>" +
+		subject + "<br><br>" +
 		"<a href=\"" + link + "\">Fire Truck Link</a><br>" +
 		"<a href=\"" + link + "\">" + link + "</a><br>";
 
