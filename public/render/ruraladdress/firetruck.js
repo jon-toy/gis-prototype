@@ -451,7 +451,8 @@ function showFeature(feature, doCenter)
 		paths: geom.getAt(0).getArray(),
 	});
 	var feature_lat_lon = getPolygonCenter(poly);
-	renderModalProperty(info_box, "Distance", getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)))
+	if (user_lat_lon != null)
+		renderModalProperty(info_box, "Distance", getMiles(google.maps.geometry.spherical.computeDistanceBetween(feature_lat_lon, user_lat_lon)))
 
 	// Edit History
 	{
@@ -754,6 +755,8 @@ function showFireTruckDispatchModal(apn, fire_district) {
 		console.log(body.recipients);
 
 		if (body.recipients.length <= 0) return;
+
+		body.subject = $('#fire-truck-dispatch-subject').val();
 		
 		$.post( "/rural-address/fire-truck-dispatch", body, function() {
 			$("#fireTruckDispatchModal").modal("hide");

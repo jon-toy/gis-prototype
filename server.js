@@ -127,6 +127,8 @@ app.post('/rural-address/send-feedback', (req, res) => {
 
 app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 	var apn = req.body['apn'];
+	var subject = req.body['subject'];
+	if (subject === null) subject = '';
 	var recipients = req.body['recipients[]'];
 
 	if ( recipients === null || apn === null ) 
@@ -178,7 +180,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 		var mailOptions = {
 			from: 'apachecountyfeedback@gmail.com',
 			to: emailRecipients,
-			subject: 'Fire Truck Dispatch Link',
+			subject: 'Dispatch Link - ' + subject,
 			html: emailHtml
 		};
 		

@@ -707,6 +707,8 @@ function showFireTruckDispatchModal(apn, fire_district) {
 		console.log(body.recipients);
 
 		if (body.recipients.length <= 0) return;
+
+		body.subject = $('#fire-truck-dispatch-subject').val();
 		
 		$.post( "/rural-address/fire-truck-dispatch", body, function() {
 			$("#fireTruckDispatchModal").modal("hide");
