@@ -162,7 +162,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 				if (recipients[i] === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
 				else if (recipients[i] === 'alpine') emailRecipients += 'z.vanslyke.alpinefire@frontier.com, ';
 				else if (recipients[i] === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
-				else if (recipients[i] === 'vernon') emailRecipients += 'chief@vfd.org, ';
+				else if (recipients[i] === 'vernon') emailRecipients += 'chief@vfdmail.org, ';
 				else if (recipients[i] === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
 			}
 		}
@@ -170,7 +170,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 				if (recipients === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
 				else if (recipients === 'alpine') emailRecipients += 'z.vanslyke.alpine@frontier.com, ';
 				else if (recipients === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
-				else if (recipients === 'vernon') emailRecipients += 'chief@vfd.org, ';
+				else if (recipients === 'vernon') emailRecipients += 'chief@vfdmail.org, ';
 				else if (recipients === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
 		}
 		
