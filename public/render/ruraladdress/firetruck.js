@@ -573,7 +573,7 @@ function renderSearchResults(results) {
 	var arraySize = 20;
 	var i, j;
 	for (i = 0, j = results.length; i < j; i+= arraySize) {
-		var subset = results.splice(i, arraySize);
+		var subset = results.splice(0, arraySize);
 		if (subset.length <= 0) break;
 		
 		search_result_sets.push(subset);
