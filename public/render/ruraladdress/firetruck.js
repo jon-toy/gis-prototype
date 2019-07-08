@@ -408,7 +408,7 @@ function getParcelFromMap(parcel_num, doCenter, doZoom)
 			paths: geom.getAt(0).getArray(),
 		});
 
-		bounds = new google.maps.LatLngBounds();
+		bounds = new google.maps.LatLngBounds(null);
 		bounds.extend(user_marker.getPosition());
 		
 		var lat_lon = getPolygonCenter(poly);
