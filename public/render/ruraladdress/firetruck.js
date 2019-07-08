@@ -229,16 +229,16 @@ function initSpecific(api_host)
 				{
 					return ({
 						strokeColor: "'#20c997'",
-						strokeOpacity: 0.8,
-						strokeWeight: 1,
+						strokeOpacity: 0.4,
+						strokeWeight: 5,
 						zIndex: 5
 					});
 				}
 				
 				return ({
 					strokeColor: "#FF0000",
-					strokeOpacity: 0.8,
-					strokeWeight: 1, 
+					strokeOpacity: 0.4,
+					strokeWeight: 5, 
 					zIndex: 5
 				});
 			}
