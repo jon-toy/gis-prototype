@@ -519,6 +519,12 @@ function initSearchModal(transportation_zone) {
 	});
 }
 
+// Rebind the submit form so pressing enter doesn't refresh the page
+$("#searchModalForm").submit(function(e){
+	e.preventDefault();
+	doSearch();
+});
+
 function doSearch() {
 
 	var value = document.getElementById("searchValue").value.toUpperCase();
