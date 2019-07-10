@@ -445,7 +445,6 @@ function showFeature(feature, doCenter)
 
 	var fire_district = getFireDistrict(feature);
 	renderModalProperty(info_box, "Fire District", fire_district);
-	renderModalProperty(info_box, "Owner", owner);
 
 	// Calculate distance from user lat lon to center
 	var geom = feature.getGeometry();
@@ -460,6 +459,7 @@ function showFeature(feature, doCenter)
 	{
 		$.getJSON(api_host + "/sheriff/edit-history/" + parcel, function (data)
 		{
+			renderModalProperty(info_box, "Owner", data.owner);
 			renderModalProperty(info_box, "Situs", data.situs);
 			document.getElementById("parcelModalLabel").innerHTML = data.situs;
 			selectFeature(feature, data.situs, doCenter);
