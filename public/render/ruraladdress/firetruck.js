@@ -11,8 +11,8 @@ var valid_transportation_zones = ["south", "vernon", "north", "east", "concho"];
 var transportation_zones_starting_points = [
 	{ lat: 33.9513, lon: -109.2292 }, 
 	{ lat: 34.3693, lon: -109.7816 },
-	{ lat: 34.3693, lon: -109.7816 },
-	{ lat: 34.3693, lon: -109.7816 },
+	{ lat: 33.9529, lon: -109.2103 },
+	{ lat: 34.6607, lon: -109.1920 },
 	{ lat: 34.5180075, lon: -109.69512700000001 }
 ];
 
