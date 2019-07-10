@@ -5,6 +5,13 @@ var edit_history_search_set = [];
  */
 function initSearchModal(transportation_zone) {
 
+	// Rebind the submit form so pressing enter doesn't refresh the page
+	$("#searchModalForm").submit(function(e){
+		e.preventDefault();
+		doSearch();
+	});
+
+
 	var uri = api_host + "/rural-addresses/edit-history/" + transportation_zone;
 
 	// Initial handler
