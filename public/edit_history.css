@@ -8,10 +8,6 @@
     #logo-container {
         display:none;
     }
-
-    .navbar-content {
-        margin-bottom: 2100000em; /* Modify this when nav needs more changes */
-    }
     
     .navbar-brand {
         content:"Apache County GIS";
