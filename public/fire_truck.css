@@ -8,6 +8,10 @@
     #logo-container {
         display:none;
     }
+
+    .navbar-content {
+        margin-bottom: 13em; /* Must define for iPhone fix */
+    }
     
     .navbar-brand {
         content:"Apache County GIS";
