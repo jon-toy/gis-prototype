@@ -756,6 +756,7 @@ function showFireTruckDispatchModal(apn, fire_district) {
 		var body = {};
 		body.recipients = [];
 		body.apn = apn;
+		body.zone = transportation_zone;
 
 		$("input:checkbox[name=fire-truck-dispatch-choices]:checked").each(function(){
 			body.recipients.push($(this).val());

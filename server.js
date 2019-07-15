@@ -127,11 +127,12 @@ app.post('/rural-address/send-feedback', (req, res) => {
 
 app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 	var apn = req.body['apn'];
+	var zone = req.body['zone'];
 	var subject = req.body['subject'];
 	if (subject === null) subject = '';
 	var recipients = req.body['recipients[]'];
 
-	if ( recipients === null || apn === null ) 
+	if ( recipients === null || apn === null || zone === null ) 
 	{
 		return res.json({"success" : false, "message": "Missing apn or recipients"});
 	}
@@ -146,7 +147,7 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 			}
 		});
 
-		var link = "https://jt.co.apache.az.us/fire_truck.html?parcel=" + apn;
+		var link = "https://jt.co.apache.az.us/fire_truck.html?parcel=" + apn + "&zone=" + zone;
 
 		// Assemble Text
 		var emailHtml = 
