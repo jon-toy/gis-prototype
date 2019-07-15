@@ -126,13 +126,14 @@ function initParcels(starting_lat_lon)
 	initFireTruckGeoCode();
 
 	// Load Markers
-	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
-	if (load_from_local_storage.markers == true && data != null) {
-		// Local Storage
-		console.log("Loaded from localStorage: Markers");
-		continueLoadingMarkers(data);
-	}
-	else {
+	// var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
+	// if (load_from_local_storage.markers == true && data != null) {
+	// 	// Local Storage
+	// 	console.log("Loaded from localStorage: Markers");
+	// 	continueLoadingMarkers(data);
+	// }
+	// else 
+	{
 		// Get from API
 		$.getJSON(api_host + "/transportation/zones/" + transportation_zone + "/markers.json", function (data) 
 		{
@@ -150,14 +151,15 @@ function initParcels(starting_lat_lon)
 		}
 	}
 	
-	// Load Text
-	var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
-	if (load_from_local_storage.text == true && data != null) {
-		// Local Storage
-		console.log("Loaded from localStorage: Text");
-		continueLoadingText(data);
-	}
-	else {
+	// // Load Text
+	// var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
+	// if (load_from_local_storage.text == true && data != null) {
+	// 	// Local Storage
+	// 	console.log("Loaded from localStorage: Text");
+	// 	continueLoadingText(data);
+	// }
+	// else 
+	{
 		// Get from API
 		$.getJSON(api_host +"/transportation/zones/" + transportation_zone + "/text.json", function (data) 
 		{
