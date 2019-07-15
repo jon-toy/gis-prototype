@@ -231,7 +231,7 @@ function initSpecific(api_host)
 				{
 					return ({
 						strokeColor: "'#20c997'",
-						strokeOpacity: 0.4,
+						strokeOpacity: 0.3,
 						strokeWeight: 5,
 						zIndex: 5
 					});
@@ -239,7 +239,7 @@ function initSpecific(api_host)
 				
 				return ({
 					strokeColor: "#FF0000",
-					strokeOpacity: 0.4,
+					strokeOpacity: 0.3,
 					strokeWeight: 5, 
 					zIndex: 5
 				});
