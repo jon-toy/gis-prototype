@@ -13,9 +13,10 @@ var search_result_sets = [];
 
 var transportation_zone = getUrlParam("zone");
 var valid_transportation_zones = ["south", "vernon", "north", "east", "concho"];
+var transportation_zone_zooms = [14, 12, 12, 12, 12];
 var transportation_zones_starting_points = [
 	{ lat: 33.9513, lon: -109.2292 }, 
-	{ lat: 34.3693, lon: -109.7816 },
+	{ lat: 34.3293, lon: -109.7816 },
 	{ lat: 33.9529, lon: -109.2103 },
 	{ lat: 34.6607, lon: -109.1920 },
 	{ lat: 34.5180075, lon: -109.69512700000001 }
@@ -29,6 +30,7 @@ if ( trans_zone_index < 0) {
 }
 
 var trans_zone_starting_point = transportation_zones_starting_points[trans_zone_index];
+var trans_zone_starting_point_zoom = transportation_zone_zooms[trans_zone_index];
 
 var rotations = {};
 
@@ -147,7 +149,7 @@ function initParcels(zone_num, starting_lat_lon, callback)
 	loadingFadeIn();
 
 	// Create the Map object
-	var starting_zoom = 14;
+	var starting_zoom = trans_zone_starting_point_zoom;
 
 	if ( starting_lat_lon == null ) starting_lat_lon = new google.maps.LatLng(trans_zone_starting_point.lat, trans_zone_starting_point.lon); // Starting position
 	if ( starting_zoom == null ) starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
