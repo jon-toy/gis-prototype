@@ -138,62 +138,78 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 	}
 	else
 	{
-		// Send the email
-		var transporter = nodemailer.createTransport({
-			service: 'gmail',
-			auth: {
-				user: 'apachecountyfeedback@gmail.com',
-				pass: 'eggdrop1315'
+		// Get the possible fire contacts
+		request.get('https://apachecountyfirecontact.firebaseio.com/fire/contacts.json', (err,response,body) => {
+			const contacts = JSON.parse(response.body);
+			// Send the email
+			var transporter = nodemailer.createTransport({
+				service: 'gmail',
+				auth: {
+					user: 'apachecountyfeedback@gmail.com',
+					pass: 'eggdrop1315'
+				}
+			});
+
+			var link = "https://jt.co.apache.az.us/fire_truck.html?parcel=" + apn + "&zone=" + zone;
+
+			// Assemble recipients
+			var emailRecipients = '';
+
+			if (Array.isArray(recipients)) {
+				for (var i = 0; i < recipients.length; i++) {
+					emailRecipients += getFromContacts(recipients[i], contacts);
+				}
 			}
-		});
-
-		var link = "https://jt.co.apache.az.us/fire_truck.html?parcel=" + apn + "&zone=" + zone;
-
-		// Assemble Text
-		var emailHtml = 
-		"Hello,<br>" +
-		"The Apache County Rural Address App " + 
-		"has sent you a Fire Truck Link: <br><br>" +
-		subject + "<br><br>" +
-		"<a href=\"" + link + "\">Fire Truck Link</a><br>" +
-		"<a href=\"" + link + "\">" + link + "</a><br>";
-
-		// Assemble recipients
-		var emailRecipients = '';
-
-		if (Array.isArray(recipients)) {
-			for (var i = 0; i < recipients.length; i++) {
-				if (recipients[i] === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
-				else if (recipients[i] === 'alpine') emailRecipients += 'z.vanslyke.alpinefire@frontier.com, ';
-				else if (recipients[i] === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
-				else if (recipients[i] === 'vernon') emailRecipients += 'chief@vfdmail.org, ';
-				else if (recipients[i] === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
+			else {
+				emailRecipients += getFromContacts(recipients, contacts);
 			}
-		}
-		else {
-				if (recipients === 'dispatch') emailRecipients += 'coffelt@co.apache.az.us, ';
-				else if (recipients === 'alpine') emailRecipients += 'z.vanslyke.alpine@frontier.com, ';
-				else if (recipients === 'eagar') emailRecipients += 'fadams@eagaraz.gov, ';
-				else if (recipients === 'vernon') emailRecipients += 'chief@vfdmail.org, ';
-				else if (recipients === 'dev') emailRecipients += 'jonathon.toy@gmail.com, robert.toy@cox.net, ';
-		}
-		
-		
-		var mailOptions = {
-			from: 'apachecountyfeedback@gmail.com',
-			to: emailRecipients,
-			subject: 'Dispatch Link - ' + subject,
-			html: emailHtml
-		};
-		
-		transporter.sendMail(mailOptions, function(error, info){
-			if (error) {
-				console.log(error);
-			} else {
-				console.log('Email sent: ' + info.response);
+			
+			function getFromContacts(department, contacts) {
+				const depUpper = department.toUpperCase();
+
+				const specifiedContacts = contacts.filter(contact => contact.department === depUpper);
+
+				const recipientStrings = specifiedContacts.map((contact) => {
+					if (contact.type == "EMAIL") {
+						return contact.value;
+					}
+					else if (contact.type == "PHONE") {
+						return contact.value + "@vtext.com";
+					}
+
+					return contact.value; // Shouldn't ever get here
+				});
+
+				return recipientStrings.join(', ');
 			}
-		});
-		return res.json({"success" : true});
+
+			// Assemble Text
+			var emailHtml = 
+			"Hello,<br>" +
+			"The Apache County Rural Address App " + 
+			"has sent you a Fire Truck Link: <br><br>" +
+			subject + "<br><br>" +
+			"<a href=\"" + link + "\">Fire Truck Link</a><br>" +
+			"<a href=\"" + link + "\">" + link + "</a><br>";
+
+			if (emailRecipients.indexOf('@vtext.com') > 0) emailHtml = link; // Add the link in non-HTML format for phones
+			
+			var mailOptions = {
+				from: 'apachecountyfeedback@gmail.com',
+				to: emailRecipients,
+				subject: 'Dispatch Link - ' + subject,
+				html: emailHtml
+			};
+			
+			transporter.sendMail(mailOptions, function(error, info){
+				if (error) {
+					console.log(error);
+				} else {
+					console.log('Email sent: ' + info.response);
+				}
+			});
+			return res.json({"success" : true});
+    	})
 	}
 });
 
