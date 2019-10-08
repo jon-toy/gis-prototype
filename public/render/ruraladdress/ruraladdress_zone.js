@@ -844,6 +844,8 @@ function showFireTruckDispatchModal(apn, fire_district) {
 		$('#fire-truck-dispatch-choices-eagar').prop('checked', true);
 	} else if (fire_district === 'Vernon') {
 		$('#fire-truck-dispatch-choices-vernon').prop('checked', true);
+	} else if (fire_district === 'Greer') {
+	$('#fire-truck-dispatch-choices-greer').prop('checked', true);
 	}
 
 	$("#fire-truck-dispatch-button").click((e) => {
