@@ -12,7 +12,7 @@ var current_search_pagination = 0;
 var search_result_sets = [];
 
 var transportation_zone = getUrlParam("zone");
-var valid_transportation_zones = ["south", "vernon", "north", "east", "concho"];
+var valid_transportation_zones = ["south", "vernon", "north", "east", "concho", "springervilleeagar"];
 var transportation_zone_zooms = [14, 12, 12, 12, 12];
 var transportation_zones_starting_points = [
 	{ lat: 33.9513, lon: -109.2292 }, 
