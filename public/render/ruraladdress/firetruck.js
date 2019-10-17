@@ -14,7 +14,7 @@ var transportation_zones_starting_points = [
 	{ lat: 35.1159, lon: -109.5619 },
 	{ lat: 34.6607, lon: -109.1920 },
 	{ lat: 34.5180075, lon: -109.69512700000001 },
-	{ lat: 33.9513, lon: -109.2292 }, 
+	{ lat: 34.1096, lon: -109.2906 }, 
 ];
 
 var transportations = [];
