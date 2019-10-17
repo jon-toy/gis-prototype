@@ -371,7 +371,7 @@ function showTransportation(feature)
 function showSitusMarkers(number) {
 	for ( var i = 0; i < marker_markers.length; i++ )
 	{
-		if ( marker_markers[i].getLabel().indexOf(number.toUpperCase()) >= 0 )
+		if ( marker_markers[i].getLabel().toUpperCase().indexOf(number.toUpperCase()) >= 0 )
 			marker_markers[i].setMap(map);
 		else
 			marker_markers[i].setMap(null);
