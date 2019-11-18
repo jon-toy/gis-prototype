@@ -157,30 +157,26 @@ app.post('/rural-address/fire-truck-dispatch', (req, res) => {
 
 			if (Array.isArray(recipients)) {
 				for (var i = 0; i < recipients.length; i++) {
-					emailRecipients += getFromContacts(recipients[i], contacts);
+					var id = parseInt(recipients[i]);
+					if (isNaN(id) || id < 0) continue;
+
+					emailRecipients += getFromContacts(id, contacts);
+					if (i < recipients.length - 1) emailRecipients += ",";
 				}
 			}
-			else {
-				emailRecipients += getFromContacts(recipients, contacts);
-			}
-			
-			function getFromContacts(department, contacts) {
-				const depUpper = department.toUpperCase();
 
-				const specifiedContacts = contacts.filter(contact => contact.department === depUpper);
+			function getFromContacts(id, contacts) {
 
-				const recipientStrings = specifiedContacts.map((contact) => {
-					if (contact.type == "EMAIL") {
-						return contact.value;
-					}
-					else if (contact.type == "PHONE") {
-						return contact.value + "@vtext.com";
-					}
+				const contact = contacts.find(contact => contact.id === id);
 
-					return contact.value; // Shouldn't ever get here
-				});
+				if (contact.type == "EMAIL") {
+					return contact.value;
+				}
+				else if (contact.type == "PHONE") {
+					return contact.value + "@vtext.com";
+				}
 
-				return recipientStrings.join(', ');
+				return '';
 			}
 
 			// Assemble Text
