@@ -447,7 +447,7 @@ function showFeature(feature, doCenter)
 	renderModalProperty(info_box, "CON", getCon(feature));
 
 	var fire_district = getFireDistrict(feature);
-	renderModalProperty(info_box, "Fire District", fire_district);
+	//renderModalProperty(info_box, "Fire District", fire_district);
 
 	// Calculate distance from user lat lon to center
 	var geom = feature.getGeometry();

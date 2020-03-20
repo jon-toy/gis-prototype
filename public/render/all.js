@@ -470,7 +470,7 @@ function showFeature(feature)
 
 	renderModalProperty(info_box, "Assessor's Situs", feature.getProperty('SITUS'));
 	renderModalProperty(info_box, "CON", getCon(feature));
-	renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
+	//renderModalProperty(info_box, "Fire District", getFireDistrict(feature));
 	if ( show_mid_bar == true ) renderModalProperty(info_box, "", "", "border-top my-3");
 	renderModalProperty(info_box, "Owner", owner);
 	renderModalProperty(info_box, "Account Information", account_number);

@@ -545,7 +545,7 @@ function showFeature(feature)
 	renderModalProperty(info_box, "CON", getCon(feature));
 
 	var fire_district = getFireDistrict(feature);
-	renderModalProperty(info_box, "Fire District", fire_district);
+	//renderModalProperty(info_box, "Fire District", fire_district);
 
 	if ( show_mid_bar == true ) renderModalProperty(info_box, "", "", "border-top my-3");
 	renderModalProperty(info_box, "Owner", owner);
