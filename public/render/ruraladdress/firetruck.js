@@ -865,7 +865,7 @@ function initFireTruckGeoCode(feature) {
         );
         user_marker.setPosition(user_lat_lon);
       });
-    }, 3000);
+    }, 1000);
 
     // Extend view to fit user
     bounds.extend(user_marker.getPosition());
