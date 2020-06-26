@@ -40,6 +40,7 @@ var viewedFeature;
 var bounds;
 var markers = [];
 var marker_markers = [];
+var currentMarkersForRoad = null;
 
 $(document).ready(function () {
   initFeedback();
@@ -205,7 +206,7 @@ function initParcels(starting_lat_lon) {
         label: {
           text: houseNumber,
           color: "white",
-          fontSize: "34px",
+          fontSize: "20px",
           fontWeight: "bold",
         },
         title: text[i].getProperty("TEXTSTRING"),
@@ -296,7 +297,7 @@ function initSpecific(api_host) {
 
       return /** @type {google.maps.Data.StyleOptions} */ ({
         fillColor: "white",
-        fillOpacity: 0.6,
+        fillOpacity: 0.3,
         strokeColor: color,
         strokeWeight: 8,
       });
@@ -315,7 +316,9 @@ function initSpecific(api_host) {
 
       // Transporation
       if (transportations.indexOf(event.feature) >= 0) {
-        showSitusMarkers(event.feature.getProperty("NUMBER"));
+        var number = event.feature.getProperty("NUMBER");
+        if (currentMarkersForRoad != number) showSitusMarkers(number);
+        else hideSitusMarkers();
         return showTransportation(event.feature);
       }
 
@@ -345,6 +348,29 @@ function initSpecific(api_host) {
         event.feature,
         true
       );
+    });
+
+    // Change color based on which terrain is set
+    map.addListener("maptypeid_changed", function () {
+      var typeToColor, type, color, k, label;
+
+      typeToColor = {
+        terrain: "black",
+        roadmap: "black",
+        hybrid: "white",
+        satellite: "white",
+      };
+
+      type = map.getMapTypeId();
+      color = typeToColor[type];
+
+      for (k in marker_markers) {
+        if (marker_markers.hasOwnProperty(k)) {
+          label = marker_markers[k].getLabel();
+          label.color = color;
+          marker_markers[k].setLabel(label);
+        }
+      }
     });
   }
 }
@@ -381,7 +407,7 @@ function showTransportation(feature) {
   renderModalProperty(info_box, "Road Name", feature.getProperty("ROAD_NAME"));
   renderModalProperty(info_box, "Number 1", feature.getProperty("NUMBER1"));
 
-  $("#transportationModal").modal("show");
+  //$("#transportationModal").modal("show");
 
   selectFeature(feature);
 
@@ -418,6 +444,15 @@ function showSitusMarkers(number) {
       marker_markers[i].setMap(map);
     else marker_markers[i].setMap(null);
   }
+
+  currentMarkersForRoad = number;
+}
+
+function hideSitusMarkers() {
+  for (var i = 0; i < marker_markers.length; i++) {
+    marker_markers[i].setMap(null);
+  }
+  currentMarkersForRoad = null;
 }
 
 /**
@@ -542,7 +577,7 @@ function selectFeature(selected_feature, label, doCenter) {
     strokeWeight: 8,
     fillColor: "white",
     strokeColor: "green",
-    fillOpacity: 0.6,
+    fillOpacity: 0.3,
   });
 
   if (label) labelFeature(label, selected_feature, true);
@@ -594,7 +629,7 @@ function labelFeature(
     label: {
       text: label_text,
       color: "black",
-      fontSize: "32px",
+      fontSize: "20px",
       fontWeight: "bold",
     },
     icon: "blank.png",
@@ -764,7 +799,7 @@ function renderSearchResults(results) {
 
     function getParcelFromMapClosure(apn) {
       return function () {
-        getParcelFromMap(apn, false, 18);
+        getParcelFromMap(apn, false, 15);
       };
     }
   }
