@@ -514,6 +514,7 @@ function showFeature(feature, doCenter, hideModal) {
 
   // Feature properties that we need to get in advance
   var parcel = feature.getProperty("PARCEL_NUM");
+  document.getElementById("parcelModalLabel").innerHTML = parcel;
   var owner = feature.getProperty("OWNER");
 
   var info_box = document.getElementById("parcel_content");
@@ -550,7 +551,6 @@ function showFeature(feature, doCenter, hideModal) {
       var houseNumber = data.situs;
       if (houseNumber.indexOf(" ") >= 0)
         houseNumber = houseNumber.split(" ")[0];
-      document.getElementById("parcelModalLabel").innerHTML = houseNumber;
 
       selectFeature(feature, houseNumber, doCenter);
     });
@@ -623,12 +623,21 @@ function labelFeature(
   var lat_lon = manual_lat_lon;
   if (lat_lon == null) lat_lon = getPolygonCenter(poly); // Deault to center of Polygon
 
+  // Set all other polygon labels to black, so only the recently searched one will show
+  for (k in parcel_num_markers) {
+    if (parcel_num_markers.hasOwnProperty(k)) {
+      label = parcel_num_markers[k].getLabel();
+      label.color = "black";
+      parcel_num_markers[k].setLabel(label);
+    }
+  }
+
   var marker = new google.maps.Marker({
     position: lat_lon,
     map: map,
     label: {
       text: label_text,
-      color: "black",
+      color: "red",
       fontSize: "20px",
       fontWeight: "bold",
     },
