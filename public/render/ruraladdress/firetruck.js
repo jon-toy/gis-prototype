@@ -37,18 +37,94 @@ var trans_zone_starting_point =
   transportation_zones_starting_points[trans_zone_index];
 var user_lat_lon, user_marker;
 var viewedFeature;
-var bounds;
+var bounds = new google.maps.LatLngBounds();
 var markers = [];
+var text = [];
 var marker_markers = [];
+var marker_markers_origin = [];
 var currentMarkersForRoad = null;
+var trans_zone_starting_point_zoom = 14;
 
 $(document).ready(function () {
   initFeedback();
-  initSearchModal(transportation_zone);
 
   mapsScaleMilesHack();
   initLastModified();
 });
+
+function mapCallback() {
+  var loadConfig = {
+    disableParcels: true,
+    disableMarkers: false,
+    disableRoads: false,
+    disableText: false,
+    continueLoadingTextCustom: (data) => continueLoadingTextCustom(data),
+    continueLoadingMarkersCustom: (data) => continueLoadingMarkersCustom(data),
+  };
+  initCacheLoad(loadConfig);
+
+  initSearchModal(transportation_zone);
+  initFireTruckGeoCode();
+}
+
+function continueLoadingMarkersCustom(data) {
+  //Add to a buffer since we don't actually want to render markers, just get their origin points
+  var buffer = new google.maps.Data();
+  markers = buffer.addGeoJson(data);
+  buffer = null; // Clear the buffer
+}
+
+function continueLoadingTextCustom(data) {
+  var buffer = new google.maps.Data();
+  text = buffer.addGeoJson(data);
+  buffer = null;
+}
+
+async function populateOriginMarkers() {
+  for (var i = 0; i < markers.length; i++) {
+    var marker = new google.maps.Marker({
+      position: markers[i].getGeometry().getAt(0), // Origin point
+      label: {
+        text: markers[i].getProperty("NUMBER0"),
+        color: "black",
+        fontSize: "20px",
+        fontWeight: "bold",
+      },
+      title: markers[i].getProperty("NUMBER"), // Store parcel number in marker for easier lookup
+      map: null,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 0,
+      },
+    });
+    marker_markers_origin.push(marker);
+  }
+}
+
+async function populateHouseMarkers() {
+  for (var i = 0; i < text.length; i++) {
+    var houseNumber = text[i].getProperty("TEXTSTRING");
+    if (houseNumber.indexOf(" ") >= 0) houseNumber = houseNumber.split(" ")[0]; // Just show houseNumber
+    // Create a label
+    var marker = new google.maps.Marker({
+      position: text[i].getGeometry().get(),
+      label: {
+        text: houseNumber,
+        color: "black",
+        fontSize: "20px",
+        fontWeight: "bold",
+      },
+      title: text[i].getProperty("TEXTSTRING"),
+      map: null,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 0,
+      },
+    });
+    markers.push(text[i]);
+    marker_markers.push(marker);
+  }
+}
 
 function initParcelParam() {
   // Get the parcel
@@ -59,190 +135,6 @@ function initParcelParam() {
   getParcelFromMap(parcel_num_param, false);
 }
 
-function initParcels(starting_lat_lon) {
-  bounds = new google.maps.LatLngBounds();
-  loadingFadeIn();
-
-  // Create the Map object
-  var starting_zoom = 14;
-
-  if (starting_lat_lon == null)
-    starting_lat_lon = new google.maps.LatLng(
-      trans_zone_starting_point.lat,
-      trans_zone_starting_point.lon
-    ); // Starting position
-  if (starting_zoom == null)
-    starting_zoom = FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD;
-
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: starting_lat_lon,
-    zoom: starting_zoom,
-    fullscreenControl: false,
-    scaleControl: true,
-    gestureHandling: "greedy",
-  });
-
-  // Highlight the parcels
-  map.data.addListener("mouseover", function (event) {
-    var color = "white";
-    map.data.overrideStyle(event.feature, {
-      strokeWeight: 8,
-      fillColor: color,
-      strokeColor: color,
-    });
-    displayCoordinates(event.latLng);
-    displayOwnerAndDistance(event.feature);
-
-    current_parcel_marker = labelFeature(
-      event.feature.getProperty("PARCEL_NUM"),
-      event.feature,
-      true
-    );
-  });
-
-  map.data.addListener("mouseout", function (event) {
-    map.data.revertStyle();
-
-    if (current_parcel_marker != null) {
-      current_parcel_marker.setMap(null);
-    }
-  });
-
-  // Show modal on click
-  map.data.addListener("click", function (event) {
-    showFeature(event.feature);
-
-    event.feature.setProperty("selected", true);
-  });
-
-  // Populate the Lat Lon. Separate from the mouseover so we keep track outside the parcels
-  google.maps.event.addListener(map, "mousemove", function (event) {
-    displayCoordinates(event.latLng);
-  });
-
-  // Wipe out the labels after we zoom out enough so it doesn't clutter the map
-  map.addListener("zoom_changed", function () {
-    if (map.getZoom() < FEATURE_LABEL_VISIBLE_ZOOM_THRESHOLD) {
-      // Wipe markers
-      // for ( var i = 0; i < parcel_num_markers.length; i++ )
-      // {
-      // 	parcel_num_markers[i].setMap(null);
-      // }
-      // parcel_num_markers = [];
-    }
-  });
-
-  // Load sheriff specific GeoJSONs
-  initFireCon(api_host);
-
-  initSpecific(api_host);
-
-  mapsScaleMilesHack();
-  initFireTruckGeoCode();
-
-  // Load Markers
-  // var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_MARKERS);
-  // if (load_from_local_storage.markers == true && data != null) {
-  // 	// Local Storage
-  // 	console.log("Loaded from localStorage: Markers");
-  // 	continueLoadingMarkers(data);
-  // }
-  // else
-  //   {
-  //     // Get from API
-  //     $.getJSON(
-  //       api_host +
-  //         "/transportation/zones/" +
-  //         transportation_zone +
-  //         "/markers.json",
-  //       function (data) {
-  //         // Store in local storage
-  //         localStorageSetItem(LOCAL_STORAGE_KEY_MARKERS, JSON.stringify(data));
-
-  //         continueLoadingMarkers(data);
-  //       }
-  //     );
-  // }
-
-  //   function continueLoadingMarkers(data) {
-  //     markers = map.data.addGeoJson(data);
-  //     for (var i = 0; i < markers.length; i++) {
-  //       markers[i].setProperty("marker", true);
-  //     }
-  //   }
-
-  // // Load Text
-  // var data = localStorageGetItemAsObject(LOCAL_STORAGE_KEY_TEXT);
-  // if (load_from_local_storage.text == true && data != null) {
-  // 	// Local Storage
-  // 	console.log("Loaded from localStorage: Text");
-  // 	continueLoadingText(data);
-  // }
-  // else
-  {
-    // Get from API
-    $.getJSON(
-      api_host + "/transportation/zones/" + transportation_zone + "/text.json",
-      function (data) {
-        // Store in local storage
-        localStorageSetItem(LOCAL_STORAGE_KEY_TEXT, JSON.stringify(data));
-
-        continueLoadingText(data);
-      }
-    );
-  }
-
-  function continueLoadingText(data) {
-    var buffer = new google.maps.Data();
-    text = buffer.addGeoJson(data);
-
-    for (var i = 0; i < text.length; i++) {
-      var houseNumber = text[i].getProperty("TEXTSTRING");
-      if (houseNumber.indexOf(" ") >= 0)
-        houseNumber = houseNumber.split(" ")[0]; // Just show houseNumber
-      // Create a label
-      var marker = new google.maps.Marker({
-        position: text[i].getGeometry().get(),
-        label: {
-          text: houseNumber,
-          color: "white",
-          fontSize: "20px",
-          fontWeight: "bold",
-        },
-        title: text[i].getProperty("TEXTSTRING"),
-        map: null,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 0,
-        },
-      });
-      markers.push(text[i]);
-      marker_markers.push(marker);
-    }
-  }
-
-  loadingFadeOut();
-}
-
-function displayOwnerAndDistance(feature) {
-  // Calculate distance from user lat lon to center
-  var geom = feature.getGeometry();
-  var poly = new google.maps.Polygon({
-    paths: geom.getAt(0).getArray(),
-  });
-  var feature_lat_lon = getPolygonCenter(poly);
-  document.getElementById("parcel-num-display").innerHTML =
-    "OWNER: " +
-    feature.getProperty("OWNER") +
-    " DISTANCE: " +
-    getMiles(
-      google.maps.geometry.spherical.computeDistanceBetween(
-        feature_lat_lon,
-        user_lat_lon
-      )
-    );
-}
-
 /**
  * Page-specific JS, called after parcel load. Load the transportation lines.
  * @param {*} api_host
@@ -250,129 +142,124 @@ function displayOwnerAndDistance(feature) {
 function initSpecific(api_host) {
   loadingFadeIn();
 
-  // Get from API
-  $.getJSON(
-    api_host + "/transportation/zones/" + transportation_zone + "/roads.json",
-    function (data) {
-      continueLoadingRoads(data);
-    }
-  );
-
-  function continueLoadingRoads(data) {
-    transportations = map.data.addGeoJson(data);
-    loadingFadeOut();
-
-    // Set colors
-    map.data.setStyle(function (feature) {
-      // Transporation
-      if (transportations.indexOf(feature) >= 0) {
-        if (feature.getProperty("selected")) {
-          return {
-            strokeColor: "'#20c997'",
-            strokeOpacity: 0.3,
-            strokeWeight: 5,
-            zIndex: 5,
-          };
-        }
-
+  // Set colors
+  map.data.setStyle(function (feature) {
+    // Transporation
+    if (transportations.indexOf(feature) >= 0) {
+      if (feature.getProperty("selected")) {
         return {
-          strokeColor: "#FF0000",
+          strokeColor: "'#20c997'",
           strokeOpacity: 0.3,
           strokeWeight: 5,
           zIndex: 5,
         };
       }
 
-      // Parcels
-      var color = "#007bff";
-
-      // Change the color of the feature permanently
-      if (feature.getProperty("selected")) {
-        color = "#20c997";
-      }
-
-      if (feature.getProperty("marker")) {
-        color = "#993300";
-      }
-
-      return /** @type {google.maps.Data.StyleOptions} */ ({
-        fillColor: "white",
-        fillOpacity: 0.3,
-        strokeColor: color,
-        strokeWeight: 8,
-      });
-    });
-
-    // Remove all listeners
-    google.maps.event.clearListeners(map.data, "click");
-    google.maps.event.clearListeners(map.data, "mouseover");
-
-    // Show modal on click
-    map.data.addListener("click", function (event) {
-      for (var i = 0; i < transportations.length; i++)
-        transportations[i].setProperty("selected", false);
-
-      event.feature.setProperty("selected", true);
-
-      // Transporation
-      if (transportations.indexOf(event.feature) >= 0) {
-        var number = event.feature.getProperty("NUMBER");
-        if (currentMarkersForRoad != number) showSitusMarkers(number);
-        else hideSitusMarkers();
-        return showTransportation(event.feature);
-      }
-
-      showFeature(event.feature);
-    });
-
-    // Mouse over
-    map.data.addListener("mouseover", function (event) {
-      var color = "#28a745";
-      map.data.overrideStyle(event.feature, {
-        strokeWeight: 8,
-        fillColor: color,
-        strokeColor: color,
-      });
-      displayCoordinates(event.latLng);
-
-      if (transportations.indexOf(event.feature) >= 0) {
-        displayTransportation(event.feature);
-      } else if (markers.indexOf(event.feature) >= 0) {
-        displayMarker(event.feature);
-      } else {
-        displayOwnerAndDistance(event.feature);
-      }
-
-      current_parcel_marker = labelFeature(
-        event.feature.getProperty("situs"),
-        event.feature,
-        true
-      );
-    });
-
-    // Change color based on which terrain is set
-    map.addListener("maptypeid_changed", function () {
-      var typeToColor, type, color, k, label;
-
-      typeToColor = {
-        terrain: "black",
-        roadmap: "black",
-        hybrid: "white",
-        satellite: "white",
+      return {
+        strokeColor: "#FF0000",
+        strokeOpacity: 0.3,
+        strokeWeight: 5,
+        zIndex: 5,
       };
+    }
 
-      type = map.getMapTypeId();
-      color = typeToColor[type];
+    // Parcels
+    var color = "#007bff";
 
-      for (k in marker_markers) {
-        if (marker_markers.hasOwnProperty(k)) {
-          label = marker_markers[k].getLabel();
-          label.color = color;
-          marker_markers[k].setLabel(label);
-        }
-      }
+    // Change the color of the feature permanently
+    if (feature.getProperty("selected")) {
+      color = "#20c997";
+    }
+
+    if (feature.getProperty("marker")) {
+      color = "#993300";
+    }
+
+    return /** @type {google.maps.Data.StyleOptions} */ ({
+      fillColor: "white",
+      fillOpacity: 0.3,
+      strokeColor: color,
+      strokeWeight: 8,
     });
-  }
+  });
+
+  // Remove all listeners
+  google.maps.event.clearListeners(map.data, "click");
+  google.maps.event.clearListeners(map.data, "mouseover");
+
+  // Show modal on click
+  map.data.addListener("click", function (event) {
+    for (var i = 0; i < transportations.length; i++)
+      transportations[i].setProperty("selected", false);
+
+    event.feature.setProperty("selected", true);
+
+    // Transporation
+    if (transportations.indexOf(event.feature) >= 0) {
+      var number = event.feature.getProperty("NUMBER");
+      if (currentMarkersForRoad != number) showSitusMarkers(number);
+      else hideSitusMarkers();
+      return showTransportation(event.feature);
+    }
+
+    showFeature(event.feature);
+  });
+
+  // Mouse over
+  map.data.addListener("mouseover", function (event) {
+    var color = "#28a745";
+    map.data.overrideStyle(event.feature, {
+      strokeWeight: 8,
+      fillColor: color,
+      strokeColor: color,
+    });
+    displayCoordinates(event.latLng);
+
+    if (transportations.indexOf(event.feature) >= 0) {
+      displayTransportation(event.feature);
+    } else if (markers.indexOf(event.feature) >= 0) {
+      displayMarker(event.feature);
+    }
+
+    current_parcel_marker = labelFeature(
+      event.feature.getProperty("situs"),
+      event.feature,
+      true
+    );
+  });
+
+  // Change color based on which terrain is set
+  map.addListener("maptypeid_changed", function () {
+    var typeToColor, type, color, k, label;
+
+    typeToColor = {
+      terrain: "black",
+      roadmap: "black",
+      hybrid: "white",
+      satellite: "white",
+    };
+
+    type = map.getMapTypeId();
+    color = typeToColor[type];
+
+    for (k in marker_markers) {
+      if (marker_markers.hasOwnProperty(k)) {
+        label = marker_markers[k].getLabel();
+        label.color = color;
+        marker_markers[k].setLabel(label);
+      }
+    }
+
+    for (k in marker_markers_origin) {
+      if (marker_markers_origin.hasOwnProperty(k)) {
+        label = marker_markers_origin[k].getLabel();
+        label.color = color;
+        marker_markers_origin[k].setLabel(label);
+      }
+    }
+  });
+
+  loadingFadeOut();
 }
 
 /**
@@ -434,6 +321,36 @@ function showTransportation(feature) {
 }
 
 function showSitusMarkers(number) {
+  for (var i = 0; i < text.length; i++) {
+    if (
+      text[i]
+        .getProperty("TEXTSTRING")
+        .toUpperCase()
+        .indexOf(number.toUpperCase()) >= 0
+    ) {
+      var houseNumber = text[i].getProperty("TEXTSTRING");
+      if (houseNumber.indexOf(" ") >= 0)
+        houseNumber = houseNumber.split(" ")[0]; // Just show houseNumber
+      // Create a label
+      var marker = new google.maps.Marker({
+        position: text[i].getGeometry().get(),
+        label: {
+          text: houseNumber,
+          color: "black",
+          fontSize: "20px",
+          fontWeight: "bold",
+        },
+        title: text[i].getProperty("TEXTSTRING"),
+        map: null,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 0,
+        },
+      });
+      markers.push(text[i]);
+      marker_markers.push(marker);
+    }
+  }
   for (var i = 0; i < marker_markers.length; i++) {
     if (
       marker_markers[i]
@@ -493,7 +410,7 @@ function getParcelFromMap(parcel_num, doCenter, zoomValue) {
     if (zoomValue) map.setZoom(zoomValue);
 
     // Satellite View
-    map.setMapTypeId("hybrid");
+    //map.setMapTypeId("hybrid"); // Disable at request of the chief, leaving in in case they change their minds
     return;
   });
 }
@@ -580,9 +497,10 @@ function selectFeature(selected_feature, label, doCenter) {
     fillOpacity: 0.3,
   });
 
+  var parcelNum = selected_feature.getProperty("PARCEL_NUM");
+
   if (label) labelFeature(label, selected_feature, true);
-  else
-    labelFeature(selected_feature.getProperty("PARCEL_NUM"), selected_feature);
+  else labelFeature(parcelNum, selected_feature);
 
   if (doCenter === true) {
     var geom = selected_feature.getGeometry();
@@ -593,7 +511,55 @@ function selectFeature(selected_feature, label, doCenter) {
     map.panTo(center);
   }
 
+  // Show the road label at the origin point for the marker for this parcel
+  if (parcelNum) showMarkerOriginLabel(parcelNum);
+
   selected_feature.setProperty("selected", true);
+}
+
+/**
+ * Show the road label at the origin point for the marker for this parcel by combing through marker_markers_origin
+ * and checking for parcel numbers (defined in continueLoadingMarkers)
+ * @param {*} parcelNum
+ */
+function showMarkerOriginLabel(parcelNum) {
+  // Grab the origin markers for the parcel we care about
+  for (var i = 0; i < markers.length; i++) {
+    if (
+      markers[i]
+        .getProperty("NUMBER")
+        .toUpperCase()
+        .indexOf(parcelNum.toUpperCase()) >= 0
+    ) {
+      var marker = new google.maps.Marker({
+        position: markers[i].getGeometry().getAt(0), // Origin point
+        label: {
+          text: markers[i].getProperty("NUMBER0"),
+          color: "black",
+          fontSize: "20px",
+          fontWeight: "bold",
+        },
+        title: markers[i].getProperty("NUMBER"), // Store parcel number in marker for easier lookup
+        map: null,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 0,
+        },
+      });
+      marker_markers_origin.push(marker);
+      break;
+    }
+  }
+  for (var i = 0; i < marker_markers_origin.length; i++) {
+    if (
+      marker_markers_origin[i]
+        .getTitle()
+        .toUpperCase()
+        .indexOf(parcelNum.toUpperCase()) >= 0
+    ) {
+      marker_markers_origin[i].setMap(map);
+    }
+  }
 }
 
 /**
@@ -637,7 +603,7 @@ function labelFeature(
     map: map,
     label: {
       text: label_text,
-      color: "red",
+      color: "green",
       fontSize: "20px",
       fontWeight: "bold",
     },
@@ -911,10 +877,10 @@ function initFireTruckGeoCode(feature) {
       });
     }, 1000);
 
-    // Extend view to fit user
-    bounds.extend(user_marker.getPosition());
-    map.fitBounds(bounds);
-    map.setCenter(bounds.getCenter());
+    // // Extend view to fit user
+    // bounds.extend(user_marker.getPosition());
+    // map.fitBounds(bounds);
+    // map.setCenter(bounds.getCenter());
   }
 }
 

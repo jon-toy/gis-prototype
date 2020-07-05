@@ -270,7 +270,7 @@
                 <textarea class="form-control" name="feedback-feedback" rows="5" required></textarea>
               </div>
               <div class="form-group">
-                  <div class="g-recaptcha" data-sitekey="6LcwGlUUAAAAAIRdD6Wzk-Kgr4qhaxwUN67JOC01" data-callback="verifyRecaptchaCallback" data-expired-callback="expiredRecaptchaCallback"></div>
+                 
                   <input class="form-control d-none" data-recaptcha="true" required data-error="Please complete the Captcha">
                   <div class="help-block with-errors"></div>
               </div>
@@ -450,13 +450,16 @@
 
     <!-- Send To Fire Truck -->
     <script src="/render/modules/send_to_fire_truck.js"></script>
+
+    <!-- Feature Caching -->
+    <script src="/render/modules/feature_caching.js"></script>
   <!-- End Modules-->
 
   <!-- Rural Address JS -->
   <script src="/render/ruraladdress/ruraladdress_zone.js"></script>
   
   <!-- Google Maps -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=initMetaData"
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD38DbmmFvH9emgUV6sTfhrrk7JpMShEsI&callback=mapCallback"
   async defer></script>
   
   <!-- Recaptcha -->
