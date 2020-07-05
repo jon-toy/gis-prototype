@@ -37,7 +37,7 @@ var trans_zone_starting_point =
   transportation_zones_starting_points[trans_zone_index];
 var user_lat_lon, user_marker;
 var viewedFeature;
-var bounds = new google.maps.LatLngBounds();
+var bounds = {};
 var markers = [];
 var text = [];
 var marker_markers = [];
@@ -848,6 +848,8 @@ function getRoadNameFromNumber(roadNumber) {
  * Then, given a parcel, zoom out to show both
  */
 function initFireTruckGeoCode(feature) {
+  bounds = new google.maps.LatLngBounds();
+
   // GeoMarker stuff
   navigator.geolocation.getCurrentPosition((position) => {
     geoInit(position);
