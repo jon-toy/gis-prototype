@@ -149,7 +149,6 @@ function initSpecific(api_host) {
       if (feature.getProperty("selected")) {
         return {
           strokeColor: "'#20c997'",
-          strokeOpacity: 0.3,
           strokeWeight: 5,
           zIndex: 5,
         };
@@ -484,6 +483,44 @@ function showFeature(feature, doCenter, hideModal) {
  * Overridden from map.js - Change fill color for readability in satellite view
  *
  * Change the style of the feature that is selected, and pan to it
+ * @param {*} selected_road
+ */
+function selectRoad(selected_road, doCenter) {
+  if (doCenter == null) doCenter = true;
+
+  // Style and color the selected feature
+  map.data.overrideStyle(selected_road, {
+    strokeWeight: 8,
+    fillColor: "white",
+    strokeColor: "green",
+  });
+
+  // if (label) labelFeature(label, selected_road, true);
+  // else labelFeature(parcelNum, selected_road);
+
+  if (doCenter === true) {
+    var geom = selected_road.getGeometry();
+    var poly = new google.maps.Polygon({
+      paths: geom.getArray(),
+    });
+    var center = getPolygonCenter(poly);
+    map.panTo(center);
+
+    var bounds = new google.maps.LatLngBounds();
+    poly.getPaths().forEach(function (path, index) {
+      var points = path.getArray();
+      for (var p in points) bounds.extend(points[p]);
+    });
+    map.fitBounds(bounds);
+  }
+
+  selected_road.setProperty("selected", true);
+}
+
+/**
+ * Overridden from map.js - Change fill color for readability in satellite view
+ *
+ * Change the style of the feature that is selected, and pan to it
  * @param {*} selected_feature
  */
 function selectFeature(selected_feature, label, doCenter) {
@@ -752,7 +789,7 @@ function renderSearchResults(results) {
       link_to_parcel.setAttribute("data-target", "#navbarSupportedContent");
 
       row.setAttribute("data-dismiss", "modal");
-      row.onclick = getParcelFromMapClosure(parcel.apn);
+      cell.onclick = getParcelFromMapClosure(parcel.apn);
 
       $(cell).append(link_to_parcel);
       $(row).append(cell);
@@ -761,13 +798,16 @@ function renderSearchResults(results) {
       $(row).append("<td>" + parcel.owner + "</td>");
 
       var roadName = getRoadNameFromNumber(parcel.road);
-      $(row).append(
-        "<td>" +
-          parcel.road +
-          "</td><td>" +
-          (roadName ? roadName : "") +
-          "</td>"
-      );
+      var link_to_road = document.createElement("a");
+      link_to_road.innerHTML = parcel.road;
+      link_to_road.setAttribute("href", "#");
+      link_to_road.setAttribute("data-toggle", "collapse");
+      link_to_road.setAttribute("data-target", "#navbarSupportedContent");
+      var cell2 = document.createElement("td");
+      $(cell2).append(link_to_road);
+      cell2.onclick = getRoadFromMapClosure(parcel.road);
+      $(row).append(cell2);
+      $(row).append("<td>" + (roadName ? roadName : "") + "</td>");
 
       $(body).append(row);
     }
@@ -777,6 +817,25 @@ function renderSearchResults(results) {
         getParcelFromMap(apn, false, 15);
       };
     }
+
+    function getRoadFromMapClosure(roadNumber) {
+      return function () {
+        getRoadFromMap(roadNumber);
+      };
+    }
+  }
+
+  function getRoadFromMap(roadNumber) {
+    var roadNumberUpper = roadNumber.toUpperCase();
+    roadNumberUpper = roadNumberUpper.replace("CR", "").trim();
+    console.log(roadNumberUpper);
+    var road = transportations.find((road) => {
+      var loopRoad = road.getProperty("NUMBER");
+      if (loopRoad) loopRoad = loopRoad.toUpperCase();
+      return roadNumberUpper == loopRoad;
+    });
+
+    selectRoad(road);
   }
 
   function renderSearchPagination() {
