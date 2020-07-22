@@ -485,9 +485,7 @@ function showFeature(feature, doCenter, hideModal) {
  * Change the style of the feature that is selected, and pan to it
  * @param {*} selected_road
  */
-function selectRoad(selected_road, doCenter) {
-  if (doCenter == null) doCenter = true;
-
+function selectRoad(selected_road, label_text) {
   // Style and color the selected feature
   map.data.overrideStyle(selected_road, {
     strokeWeight: 8,
@@ -498,21 +496,33 @@ function selectRoad(selected_road, doCenter) {
   // if (label) labelFeature(label, selected_road, true);
   // else labelFeature(parcelNum, selected_road);
 
-  if (doCenter === true) {
-    var geom = selected_road.getGeometry();
-    var poly = new google.maps.Polygon({
-      paths: geom.getArray(),
-    });
-    var center = getPolygonCenter(poly);
-    map.panTo(center);
+  var geom = selected_road.getGeometry();
+  var poly = new google.maps.Polygon({
+    paths: geom.getArray(),
+  });
+  var center = getPolygonCenter(poly);
+  map.panTo(center);
 
-    var bounds = new google.maps.LatLngBounds();
-    poly.getPaths().forEach(function (path, index) {
-      var points = path.getArray();
-      for (var p in points) bounds.extend(points[p]);
-    });
-    map.fitBounds(bounds);
-  }
+  var bounds = new google.maps.LatLngBounds();
+  poly.getPaths().forEach(function (path, index) {
+    var points = path.getArray();
+    for (var p in points) bounds.extend(points[p]);
+  });
+  map.fitBounds(bounds);
+
+  // Add a label at the center
+  var marker = new google.maps.Marker({
+    position: center,
+    map: map,
+    label: {
+      text: label_text,
+      color: "black",
+      fontSize: "20px",
+      fontWeight: "bold",
+    },
+    icon: "blank.png",
+  });
+  marker.setMap(map);
 
   selected_road.setProperty("selected", true);
 }
@@ -762,7 +772,33 @@ function renderSearchResults(results) {
     search_result_sets.push(subset);
   }
 
-  if (search_result_sets.length <= 0) search_result_sets.push([]);
+  if (search_result_sets.length <= 0) {
+    var value = document.getElementById("searchValue").value.toUpperCase();
+    var type = $("#searchBy option:selected").val();
+
+    var zero_set = [];
+
+    // If we search for a road number with no parcels on it (8290), add a dummy result
+    // so the user can still click to go to the road
+    if (type === "road") {
+      var foundRoad = transportations.find((road) => {
+        var name = road.getProperty("NUMBER");
+        return name != null && name.toUpperCase().indexOf(value) >= 0;
+      });
+      if (foundRoad) {
+        var dummy = {
+          owner: "",
+          situs: "",
+          road: foundRoad.getProperty("NUMBER"),
+          isRoad: true,
+        };
+
+        zero_set.push(dummy);
+      }
+    }
+
+    search_result_sets.push(zero_set);
+  }
 
   current_search_pagination = 0;
   renderTwentyResults(search_result_sets[current_search_pagination]); // Show the first subset by default
@@ -783,15 +819,18 @@ function renderSearchResults(results) {
       // Go to Parcel
       var cell = document.createElement("td");
       var link_to_parcel = document.createElement("a");
-      link_to_parcel.innerHTML = "Go to Parcel";
-      link_to_parcel.setAttribute("href", "#");
-      link_to_parcel.setAttribute("data-toggle", "collapse");
-      link_to_parcel.setAttribute("data-target", "#navbarSupportedContent");
 
       row.setAttribute("data-dismiss", "modal");
-      cell.onclick = getParcelFromMapClosure(parcel.apn);
 
-      $(cell).append(link_to_parcel);
+      if (!parcel.isRoad) {
+        link_to_parcel.innerHTML = "Go to Parcel";
+        link_to_parcel.setAttribute("href", "#");
+        link_to_parcel.setAttribute("data-toggle", "collapse");
+        link_to_parcel.setAttribute("data-target", "#navbarSupportedContent");
+        cell.onclick = getParcelFromMapClosure(parcel.apn);
+
+        $(cell).append(link_to_parcel);
+      }
       $(row).append(cell);
 
       $(row).append("<td>" + parcel.situs + "</td>");
@@ -835,7 +874,7 @@ function renderSearchResults(results) {
       return roadNumberUpper == loopRoad;
     });
 
-    selectRoad(road);
+    selectRoad(road, roadNumber);
   }
 
   function renderSearchPagination() {
