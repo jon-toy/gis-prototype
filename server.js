@@ -159,6 +159,18 @@ app.post("/rural-address/fire-truck-dispatch", (req, res) => {
       (err, response, body) => {
         const contacts = JSON.parse(response.body);
         // Send the email
+
+        const oauth2Client = new OAuth2(
+          nodemailerCreds.clientId,
+          nodemailerCreds.clientSecret, // Client Secret
+          "https://developers.google.com/oauthplayground" // Redirect URL
+        );
+
+        oauth2Client.setCredentials({
+          refresh_token: "Your Refresh Token Here",
+        });
+        const accessToken = oauth2Client.getAccessToken();
+
         var transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
