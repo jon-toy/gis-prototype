@@ -292,9 +292,10 @@ app.post("/submit-feedback", function (req, res) {
         secure: true,
         auth: {
           type: "OAuth2",
-          clientId:
-            "888653937006-arhjo2nsdvdtihkf3m9jeq24ejqbkn4h.apps.googleusercontent.com",
-          clientSecret: "vEFVoUVgk8hp6Mov4mIuOnMg",
+          clientId: nodemailerCreds.clientId,
+          clientSecret: nodemailerCreds.clientSecret,
+          refreshToken: nodemailerCreds.refreshToken,
+          accessToken: accessToken,
         },
       });
 
@@ -303,14 +304,6 @@ app.post("/submit-feedback", function (req, res) {
         to: "apachecountyfeedback@gmail.com",
         subject: "GIS Feedback",
         text: "Feedback from " + name + ", " + email + ": " + feedback,
-        auth: {
-          user: "apachecountyfeedback@gmail.com",
-          refreshToken:
-            "1//042VQ0yFv8kZSCgYIARAAGAQSNwF-L9IrZMQpfBbhIGYcl6QzckTJ3GqK-jQEvrYEms1CSRo03156kI5EFevtFxJPFKredzGSaOs",
-          accessToken:
-            "ya29.a0AfH6SMC37tJqEaZUyONUlIoPYE5DA-SBvwi0JUweYc156TQb4HyiLRCseN6AU_azboT-5-aNEfFaE6FZzaL95mRGp90tiQTkyVrXc7xPAILWYJHziTDGLGtBq-egGLbfIoDgfUzhg247Cyws2e-myMlRJWAM",
-          expires: 1484314697598,
-        },
       };
 
       transporter.sendMail(mailOptions, function (error, info) {
