@@ -162,8 +162,12 @@ app.post("/rural-address/fire-truck-dispatch", (req, res) => {
         var transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
+            type: "OAuth2",
             user: "apachecountyfeedback@gmail.com",
-            pass: "eggdrop1315",
+            clientId: nodemailerCreds.clientId,
+            clientSecret: nodemailerCreds.clientSecret,
+            refreshToken: nodemailerCreds.refreshToken,
+            accessToken: accessToken,
           },
         });
 
