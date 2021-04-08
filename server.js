@@ -29,6 +29,11 @@ app.get("/zone_select.html", function (req, res) {
 
 app.use(express.static(__dirname + "/public"));
 
+// Monitoring
+app.get("/health", (req, res) => {
+  res.status(200).send({ success: true });
+});
+
 app.get("/get-maps", function (req, res) {
   if (req.host == "localhost") in_dev = true;
 
