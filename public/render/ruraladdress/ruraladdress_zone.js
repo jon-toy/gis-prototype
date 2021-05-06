@@ -182,9 +182,9 @@ function showFeature(feature) {
     showParcelFeedbackModal(parcel);
   };
 
-  document.getElementById("button-link-fire-truck-dispatch").onclick = () => {
-    showFireTruckDispatchModal(parcel, fire_district);
-  };
+  // document.getElementById("button-link-fire-truck-dispatch").onclick = () => {
+  //   showFireTruckDispatchModal(parcel, fire_district);
+  // };
 
   $("#parcelModal").modal("show");
 
