@@ -43,7 +43,7 @@ var text = [];
 var marker_markers = [];
 var marker_markers_origin = [];
 var currentMarkersForRoad = null;
-var trans_zone_starting_point_zoom = 14;
+var trans_zone_starting_point_zoom = 15;
 
 $(document).ready(function () {
   initFeedback();
@@ -60,11 +60,17 @@ function mapCallback() {
     disableText: false,
     continueLoadingTextCustom: (data) => continueLoadingTextCustom(data),
     continueLoadingMarkersCustom: (data) => continueLoadingMarkersCustom(data),
+    preParcelCallback: () => initParcelParam(),
   };
+
   initCacheLoad(loadConfig);
 
   initSearchModal(transportation_zone);
-  initFireTruckGeoCode();
+
+  // initSearchModal(transportation_zone);
+  // goToUserLatLon();
+  // initParcelParam();
+  //initFireTruckGeoCode();
 }
 
 function continueLoadingMarkersCustom(data) {

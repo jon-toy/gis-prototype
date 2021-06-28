@@ -54,13 +54,13 @@ function initMetaData(loadConfig) {
         localStorageSetItem(LOCAL_STORAGE_KEY_ZONE_FLAG, transportation_zone);
       } catch (e) {}
 
-      initFeatures();
+      initFeatures(null, null, loadConfig.preParcelCallback);
 
       return;
     }
 
     if (JSON.stringify(data) == JSON.stringify(localData)) {
-      initFeatures();
+      initFeatures(null, null, loadConfig.preParcelCallback);
       return; // Identical meta data for all zones, so load all components
       // from local storage
     }
@@ -70,7 +70,7 @@ function initMetaData(loadConfig) {
     var localZone = localData.find((zone) => zone.name == transportation_zone);
 
     if (JSON.stringify(zone) == JSON.stringify(localZone)) {
-      initFeatures();
+      initFeatures(null, null, loadConfig.preParcelCallback);
       return; // Identical meta data for this zone, so load all components
       // from local storage
     }
@@ -107,7 +107,7 @@ function initMetaData(loadConfig) {
     // Something changed, so update local storage
     localStorageSetItem(LOCAL_STORAGE_KEY_META_DATA, JSON.stringify(data));
 
-    initFeatures();
+    initFeatures(null, null, loadConfig.preParcelCallback);
   });
 }
 
@@ -116,7 +116,7 @@ function initMetaData(loadConfig) {
  * load only the parcels in that zone. If not, load ALL the parcels
  * @param {*} zone_num
  */
-function initFeatures(zone_num, starting_lat_lon, callback) {
+function initFeatures(zone_num, starting_lat_lon, preParcelCallback) {
   loadingFadeIn();
 
   // Create the Map object
@@ -196,6 +196,8 @@ function initFeatures(zone_num, starting_lat_lon, callback) {
 
   // Load sheriff specific GeoJSONs
   initFireCon(api_host);
+
+  if (preParcelCallback) preParcelCallback();
 
   // Load Parcels
   if (loadConfig.disableParcels != true) {
